@@ -1,10 +1,30 @@
+
+-- Dropping tables before init
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS authors CASCADE;
+DROP TABLE IF EXISTS genres CASCADE;
+DROP TABLE IF EXISTS books CASCADE;
+DROP TABLE IF EXISTS book_authors CASCADE;
+DROP TABLE IF EXISTS book_genres CASCADE;
+DROP TABLE IF EXISTS reservations CASCADE;
+DROP TABLE IF EXISTS ratings CASCADE;
+DROP TABLE IF EXISTS comments CASCADE;
+
+-- Drop types
+DROP TYPE IF EXISTS user_role CASCADE;
+DROP TYPE IF EXISTS reservation_status CASCADE;
+
+-- Create Enums
+CREATE TYPE user_role AS ENUM ('ADMIN', 'USER');
+CREATE TYPE reservation_status AS ENUM ('OCZEKUJĄCA', 'POTWIERDZONA', 'WYPOŻYCZONA', 'ZWRÓCONA');
+
 -- Users table
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'USER',
+    role user_role NOT NULL DEFAULT 'USER',
     enabled BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -51,12 +71,11 @@ CREATE TABLE book_genres (
 );
 
 -- Reservations table
--- States: OCZEKUJĄCA, POTWIERDZONA, WYPOŻYCZONA, ZWRÓCONA
 CREATE TABLE reservations (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     book_id INTEGER REFERENCES books(id) ON DELETE CASCADE,
-    status VARCHAR(20) NOT NULL DEFAULT 'OCZEKUJĄCA',
+    status reservation_status NOT NULL DEFAULT 'OCZEKUJĄCA',
     reserved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     confirmed_at TIMESTAMP,
     loaned_at TIMESTAMP,
@@ -70,9 +89,8 @@ CREATE TABLE ratings (
     book_id INTEGER REFERENCES books(id) ON DELETE CASCADE,
     rating INTEGER CHECK (rating >= 1 AND rating <= 5),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    -- Week restriction should be handled at application level as per requirements, 
-    -- but we can add a constraint or index if needed.
-    UNIQUE (user_id, book_id, created_at) -- Simplified, app logic will handle "once per week"
+
+    UNIQUE (user_id, book_id, created_at)
 );
 
 -- Comments table
