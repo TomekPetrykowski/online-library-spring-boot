@@ -13,7 +13,7 @@
 - **Layered Architecture:** Controller -> Service -> Repository/DAO.
 - **Persistence:** * Use **Spring Data JPA** for standard CRUD and complex relationships.
     - Use **JdbcTemplate** for specific performance-heavy queries or custom DAO logic.
-- **Data Mapping:** * **Manual Mappers:** Do not use MapStruct. Create dedicated mapper classes or static methods to convert Entity ↔ DTO.
+- **Data Mapping:** * **Automatic Model Mapping:** For model mapping use ModelMapper from org.modelmapper. If this is impossible, then create dedicated mapper classes or static methods to convert Entity ↔ DTO.
     - **Validation:** Use `jakarta.validation` (`@NotNull`, `@NotBlank`, etc.) in DTOs.
 - **Error Handling:** Global handler using `@RestControllerAdvice` and `@ExceptionHandler`. Custom exceptions like `ResourceNotFoundException` are required.
 ## 3. Database Schema & Models
