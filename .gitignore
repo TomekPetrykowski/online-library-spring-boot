@@ -57,4 +57,7 @@ build/
 hs_err_pid*
 replay_pid*
 
+# InteliJ connection to db
+library.iml
+
 .env
