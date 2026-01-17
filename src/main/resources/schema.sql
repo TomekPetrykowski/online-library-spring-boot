@@ -33,6 +33,7 @@ CREATE TABLE users (
 CREATE TABLE authors (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
     bio TEXT
 );
 

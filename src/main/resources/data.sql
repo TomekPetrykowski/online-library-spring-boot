@@ -5,10 +5,10 @@ INSERT INTO users (username, password, email, role) VALUES
 ('user2', '$2a$10$vNfO24u2Y0b9HkYjY6H9.O.X.j/W6Zp0G0v.Q5.S8Y.M2L.I6P.m.', 'user2@example.com', 'USER');
 
 -- Seed Authors
-INSERT INTO authors (name, bio) VALUES
-('J.K. Rowling', 'British author, best known for the Harry Potter series.'),
-('George R.R. Martin', 'American novelist and short-story writer in the fantasy, horror, and science fiction genres.'),
-('J.R.R. Tolkien', 'English writer, poet, philologist, and academic, best known as the author of The Hobbit and The Lord of the Rings.');
+INSERT INTO authors (name, last_name, bio) VALUES
+('J.K.', 'Rowling', 'British author, best known for the Harry Potter series.'),
+('George R.R.', 'Martin', 'American novelist and short-story writer in the fantasy, horror, and science fiction genres.'),
+('J.R.R. ', 'Tolkien','English writer, poet, philologist, and academic, best known as the author of The Hobbit and The Lord of the Rings.');
 
 -- Seed Genres
 INSERT INTO genres (name) VALUES
