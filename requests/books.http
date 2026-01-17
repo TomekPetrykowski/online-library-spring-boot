@@ -1,0 +1,44 @@
+### Create Book
+POST {{base_url}}/books
+Content-Type: application/json
+
+{
+  "title": "Pan Tadeusz",
+  "description": "National epic of Poland.",
+  "publisher": "Paris Publishing",
+  "publishYear": 1834,
+  "isbn": "1234567890",
+  "copiesAvailable": 5
+}
+
+> {% client.global.set("book_id", response.body.id); %}
+
+### List Books
+GET {{base_url}}/books
+
+### Get Book
+GET {{base_url}}/books/{{book_id}}
+
+### Full Update Book
+PUT {{base_url}}/books/{{book_id}}
+Content-Type: application/json
+
+{
+  "title": "Pan Tadeusz - Special Edition",
+  "description": "Updated description.",
+  "publisher": "Paris Publishing",
+  "publishYear": 1834,
+  "isbn": "1234567890",
+  "copiesAvailable": 10
+}
+
+### Partial Update Book
+PATCH {{base_url}}/books/{{book_id}}
+Content-Type: application/json
+
+{
+  "copiesAvailable": 15
+}
+
+### Delete Book
+DELETE {{base_url}}/books/{{book_id}}

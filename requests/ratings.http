@@ -1,0 +1,20 @@
+### Create Rating
+POST {{base_url}}/ratings
+Content-Type: application/json
+
+{
+  "user": { "id": 1 },
+  "book": { "id": 1 },
+  "rating": 5
+}
+
+> {% client.global.set("rating_id", response.body.id); %}
+
+### List Ratings
+GET {{base_url}}/ratings
+
+### Get Rating
+GET {{base_url}}/ratings/{{rating_id}}
+
+### Delete Rating
+DELETE {{base_url}}/ratings/{{rating_id}}

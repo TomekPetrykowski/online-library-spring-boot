@@ -1,0 +1,20 @@
+### Create Comment
+POST {{base_url}}/comments
+Content-Type: application/json
+
+{
+  "user": { "id": 1 },
+  "book": { "id": 1 },
+  "content": "A masterpiece of Polish literature."
+}
+
+> {% client.global.set("comment_id", response.body.id); %}
+
+### List Comments
+GET {{base_url}}/comments
+
+### Get Comment
+GET {{base_url}}/comments/{{comment_id}}
+
+### Delete Comment
+DELETE {{base_url}}/comments/{{comment_id}}

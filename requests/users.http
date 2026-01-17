@@ -1,0 +1,22 @@
+### Create User
+POST {{base_url}}/users
+Content-Type: application/json
+
+{
+  "username": "jdoe",
+  "password": "password123123123",
+  "email": "jdoe@example.com",
+  "role": "USER",
+  "enabled": true
+}
+
+> {% client.global.set("user_id", response.body.id); %}
+
+### List Users
+GET {{base_url}}/users
+
+### Get User
+GET {{base_url}}/users/{{user_id}}
+
+### Delete User
+DELETE {{base_url}}/users/{{user_id}}

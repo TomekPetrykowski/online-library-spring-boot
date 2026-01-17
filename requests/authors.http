@@ -1,0 +1,38 @@
+### Create Author
+POST {{base_url}}/authors
+Content-Type: application/json
+
+{
+  "name": "Adam",
+  "lastName": "Mickiewicz",
+  "bio": "Polish poet, dramatist, essayist, publicist, translator and political activist."
+}
+
+> {% client.global.set("author_id", response.body.id); %}
+
+### List Authors
+GET {{base_url}}/authors
+
+### Get Author
+GET {{base_url}}/authors/{{author_id}}
+
+### Full Update Author
+PUT {{base_url}}/authors/{{author_id}}
+Content-Type: application/json
+
+{
+  "name": "Adam Bernard",
+  "lastName": "Mickiewicz",
+  "bio": "Updated bio: Polish poet and dramatist."
+}
+
+### Partial Update Author
+PATCH {{base_url}}/authors/{{author_id}}
+Content-Type: application/json
+
+{
+  "bio": "Partially updated bio."
+}
+
+### Delete Author
+DELETE {{base_url}}/authors/{{author_id}}

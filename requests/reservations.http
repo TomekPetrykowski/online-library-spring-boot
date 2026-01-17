@@ -1,0 +1,28 @@
+### Create Reservation
+POST {{base_url}}/reservations
+Content-Type: application/json
+
+{
+  "user": { "id": 1 },
+  "book": { "id": 1 },
+  "status": "OCZEKUJĄCA"
+}
+
+> {% client.global.set("reservation_id", response.body.id); %}
+
+### List Reservations
+GET {{base_url}}/reservations
+
+### Get Reservation
+GET {{base_url}}/reservations/{{reservation_id}}
+
+### Partial Update Reservation
+PATCH {{base_url}}/reservations/{{reservation_id}}
+Content-Type: application/json
+
+{
+  "status": "POTWIERDZONA"
+}
+
+### Delete Reservation
+DELETE {{base_url}}/reservations/{{reservation_id}}
