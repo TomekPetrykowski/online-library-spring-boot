@@ -21,6 +21,7 @@
 - **Relationships:** * `@OneToMany` / `@ManyToOne` with `@JoinColumn`.
     - `@ManyToMany` with `@JoinTable`.
 - **Initialization:** Use `.sql` files for schema/data seeding.
+- **Jdbctemplate:** Use `JdbcTemplate` for specific performance-heavy queries. Use in dedicated DAO classes.
 ## 4. Business Logic: Reservations & Books
 - **Reservation States:** Must implement: `OCZEKUJĄCA`, `POTWIERDZONA`, `WYPOŻYCZONA`, `ZWRÓCONA`.
 - **Loan Flow:** User reserves -> Reservation confirmation (state change) -> Book loan.
@@ -40,8 +41,9 @@
 - **Styling:** Bootstrap 5.
 - **Features:** File upload (images/covers), Download (Resources), and Export to CSV/PDF.
 ## 7. Testing & Quality
+- **Important:** Write tests for every important feature after implementation.
 - **Coverage:** Minimum **70%** (JaCoCo).
-- **Unit Tests:** JUnit 5 + Mockito (`@Mock`, `@InjectMocks`).
-- **Persistence Tests:** `@DataJpaTest` for repositories (min. 10 CRUD tests).
+- **Unit Tests:** JUnit 5 + Mockito (`@Mock`, `@InjectMocks`, `verify()`).
+- **Persistence Tests:** `@DataJpaTest` for repositories. RowMapper and custom queries.
 - **Integration Tests:** `MockMvc` for REST controllers and `@WithMockUser` for Security.
-- **Architecture Tests:** Use **ArchUnit** to enforce package rules (e.g., Controllers must not depend directly on Entities).
+- **Use test utils:** `TestData` utils for common entities and DTOs creation.
