@@ -17,7 +17,7 @@ INSERT INTO genres (name) VALUES
 
 INSERT INTO books (title, description, publisher, publish_year, isbn, copies_available) VALUES
 ('Harry Potter i Kamień filozoficzny', 'Pierwsza książka o Horym Pioterze', 'Scholastic', 1997, '9780590353403', 5),
-('Harry Potter i Komnata Tajemnic', 'Druga (tzn. gorsza) książka o Horym Pioterze', 'Scholastic', 1999, '9780590353403', 1),
+('Harry Potter i Komnata Tajemnic', 'Druga (tzn. gorsza) książka o Horym Pioterze', 'Scholastic', 1999, '9780590353404', 1),
 ('Gra o tron', 'Pierwsza nowela, która zainspirowała netfliksa', 'Bantam Spectra', 1996, '9780553103540', 3),
 ('Hobbit', 'Trochę krótka książka o pewnym krótkim człowieczki', 'George Allen & Unwin', 1937, '9780261102217', 10);
 
