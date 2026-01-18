@@ -68,6 +68,13 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    public List<ReservationDto> findByUserId(Long userId) {
+        return reservationRepository.findByUserId(userId).stream()
+                .map(reservationMapper::mapTo)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void delete(Long id) {
         reservationRepository.deleteById(id);
     }
