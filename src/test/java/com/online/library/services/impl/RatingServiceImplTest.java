@@ -1,10 +1,14 @@
 package com.online.library.services.impl;
 
 import com.online.library.domain.dto.RatingDto;
+import com.online.library.domain.entities.BookEntity;
 import com.online.library.domain.entities.RatingEntity;
+import com.online.library.domain.entities.UserEntity;
 import com.online.library.exceptions.ResourceNotFoundException;
 import com.online.library.mappers.Mapper;
+import com.online.library.repositories.BookRepository;
 import com.online.library.repositories.RatingRepository;
+import com.online.library.repositories.UserRepository;
 import com.online.library.utils.TestDataUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,12 +20,15 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +36,12 @@ public class RatingServiceImplTest {
 
     @Mock
     private RatingRepository ratingRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private BookRepository bookRepository;
 
     @Mock
     private Mapper<RatingEntity, RatingDto> ratingMapper;
@@ -153,5 +166,226 @@ public class RatingServiceImplTest {
         underTest.delete(ratingId);
 
         verify(ratingRepository, times(1)).deleteById(ratingId);
+    }
+
+    @Test
+    public void testThatFindByBookIdReturnsListOfRatings() {
+        Long bookId = 1L;
+        RatingEntity ratingEntity = TestDataUtil.createTestRating(null, null);
+        RatingDto ratingDto = RatingDto.builder().id(1L).rating(5).build();
+
+        when(ratingRepository.findByBookId(bookId)).thenReturn(List.of(ratingEntity));
+        when(ratingMapper.mapTo(ratingEntity)).thenReturn(ratingDto);
+
+        List<RatingDto> result = underTest.findByBookId(bookId);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isEqualTo(ratingDto);
+    }
+
+    @Test
+    public void testThatFindByUserIdReturnsListOfRatings() {
+        Long userId = 1L;
+        RatingEntity ratingEntity = TestDataUtil.createTestRating(null, null);
+        RatingDto ratingDto = RatingDto.builder().id(1L).rating(5).build();
+
+        when(ratingRepository.findByUserId(userId)).thenReturn(List.of(ratingEntity));
+        when(ratingMapper.mapTo(ratingEntity)).thenReturn(ratingDto);
+
+        List<RatingDto> result = underTest.findByUserId(userId);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isEqualTo(ratingDto);
+    }
+
+    @Test
+    public void testThatCanUserRateBookReturnsTrueWhenNoRecentRating() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        UserEntity user = TestDataUtil.createTestUser();
+        user.setId(userId);
+        BookEntity book = TestDataUtil.createTestBook();
+        book.setId(bookId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(ratingRepository.findRecentRatingByUserAndBook(eq(user), eq(book), any(LocalDateTime.class)))
+                .thenReturn(Optional.empty());
+
+        boolean result = underTest.canUserRateBook(userId, bookId);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void testThatCanUserRateBookReturnsFalseWhenRecentRatingExists() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        UserEntity user = TestDataUtil.createTestUser();
+        user.setId(userId);
+        BookEntity book = TestDataUtil.createTestBook();
+        book.setId(bookId);
+        RatingEntity recentRating = TestDataUtil.createTestRating(user, book);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(ratingRepository.findRecentRatingByUserAndBook(eq(user), eq(book), any(LocalDateTime.class)))
+                .thenReturn(Optional.of(recentRating));
+
+        boolean result = underTest.canUserRateBook(userId, bookId);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testThatCanUserRateBookThrowsExceptionWhenUserNotFound() {
+        Long userId = 1L;
+        Long bookId = 1L;
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.canUserRateBook(userId, bookId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("User not found");
+    }
+
+    @Test
+    public void testThatCanUserRateBookThrowsExceptionWhenBookNotFound() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        UserEntity user = TestDataUtil.createTestUser();
+        user.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.canUserRateBook(userId, bookId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Book not found");
+    }
+
+    @Test
+    public void testThatAddRatingSucceedsWhenUserCanRate() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        Integer ratingValue = 4;
+        UserEntity user = TestDataUtil.createTestUser();
+        user.setId(userId);
+        BookEntity book = TestDataUtil.createTestBook();
+        book.setId(bookId);
+        RatingEntity savedRating = TestDataUtil.createTestRating(user, book);
+        savedRating.setId(1L);
+        savedRating.setRating(ratingValue);
+        RatingDto ratingDto = RatingDto.builder().id(1L).rating(ratingValue).build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(ratingRepository.findRecentRatingByUserAndBook(eq(user), eq(book), any(LocalDateTime.class)))
+                .thenReturn(Optional.empty());
+        when(ratingRepository.save(any(RatingEntity.class))).thenReturn(savedRating);
+        when(ratingRepository.calculateAverageRatingByBookId(bookId)).thenReturn(Optional.of(new BigDecimal("4.00")));
+        when(ratingMapper.mapTo(savedRating)).thenReturn(ratingDto);
+
+        RatingDto result = underTest.addRating(userId, bookId, ratingValue);
+
+        assertThat(result).isEqualTo(ratingDto);
+        verify(ratingRepository, times(1)).save(any(RatingEntity.class));
+        verify(bookRepository, times(1)).save(book);
+    }
+
+    @Test
+    public void testThatAddRatingThrowsExceptionWhenUserCannotRate() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        Integer ratingValue = 4;
+        UserEntity user = TestDataUtil.createTestUser();
+        user.setId(userId);
+        BookEntity book = TestDataUtil.createTestBook();
+        book.setId(bookId);
+        RatingEntity recentRating = TestDataUtil.createTestRating(user, book);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(ratingRepository.findRecentRatingByUserAndBook(eq(user), eq(book), any(LocalDateTime.class)))
+                .thenReturn(Optional.of(recentRating));
+
+        assertThatThrownBy(() -> underTest.addRating(userId, bookId, ratingValue))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("User can only rate a book once per week");
+    }
+
+    @Test
+    public void testThatCalculateAverageRatingReturnsCorrectAverage() {
+        Long bookId = 1L;
+        BigDecimal expectedAverage = new BigDecimal("4.50");
+
+        when(ratingRepository.calculateAverageRatingByBookId(bookId))
+                .thenReturn(Optional.of(expectedAverage));
+
+        BigDecimal result = underTest.calculateAverageRating(bookId);
+
+        assertThat(result).isEqualByComparingTo(expectedAverage);
+    }
+
+    @Test
+    public void testThatCalculateAverageRatingReturnsZeroWhenNoRatings() {
+        Long bookId = 1L;
+
+        when(ratingRepository.calculateAverageRatingByBookId(bookId))
+                .thenReturn(Optional.empty());
+
+        BigDecimal result = underTest.calculateAverageRating(bookId);
+
+        assertThat(result).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    public void testThatCountRatingsForBookReturnsCorrectCount() {
+        Long bookId = 1L;
+        Long expectedCount = 10L;
+
+        when(ratingRepository.countRatingsByBookId(bookId)).thenReturn(expectedCount);
+
+        Long result = underTest.countRatingsForBook(bookId);
+
+        assertThat(result).isEqualTo(expectedCount);
+    }
+
+    @Test
+    public void testThatGetUserRatingForBookReturnsRatingWhenExists() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        UserEntity user = TestDataUtil.createTestUser();
+        user.setId(userId);
+        BookEntity book = TestDataUtil.createTestBook();
+        book.setId(bookId);
+        RatingEntity rating = TestDataUtil.createTestRating(user, book);
+        rating.setRating(4);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(ratingRepository.findByUserAndBook(user, book)).thenReturn(Optional.of(rating));
+
+        Integer result = underTest.getUserRatingForBook(userId, bookId);
+
+        assertThat(result).isEqualTo(4);
+    }
+
+    @Test
+    public void testThatGetUserRatingForBookReturnsNullWhenNoRating() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        UserEntity user = TestDataUtil.createTestUser();
+        user.setId(userId);
+        BookEntity book = TestDataUtil.createTestBook();
+        book.setId(bookId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(ratingRepository.findByUserAndBook(user, book)).thenReturn(Optional.empty());
+
+        Integer result = underTest.getUserRatingForBook(userId, bookId);
+
+        assertThat(result).isNull();
     }
 }

@@ -1,10 +1,14 @@
 package com.online.library.services.impl;
 
 import com.online.library.domain.dto.CommentDto;
+import com.online.library.domain.entities.BookEntity;
 import com.online.library.domain.entities.CommentEntity;
+import com.online.library.domain.entities.UserEntity;
 import com.online.library.exceptions.ResourceNotFoundException;
 import com.online.library.mappers.Mapper;
+import com.online.library.repositories.BookRepository;
 import com.online.library.repositories.CommentRepository;
+import com.online.library.repositories.UserRepository;
 import com.online.library.utils.TestDataUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +33,12 @@ public class CommentServiceImplTest {
 
     @Mock
     private CommentRepository commentRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private BookRepository bookRepository;
 
     @Mock
     private Mapper<CommentEntity, CommentDto> commentMapper;
@@ -153,5 +163,118 @@ public class CommentServiceImplTest {
         underTest.delete(commentId);
 
         verify(commentRepository, times(1)).deleteById(commentId);
+    }
+
+    @Test
+    public void testThatFindByBookIdReturnsListOfComments() {
+        Long bookId = 1L;
+        CommentEntity commentEntity = TestDataUtil.createTestComment(null, null);
+        CommentDto commentDto = CommentDto.builder().id(1L).content("Great book!").build();
+
+        when(commentRepository.findByBookIdOrderByCreatedAtDesc(bookId)).thenReturn(List.of(commentEntity));
+        when(commentMapper.mapTo(commentEntity)).thenReturn(commentDto);
+
+        List<CommentDto> result = underTest.findByBookId(bookId);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isEqualTo(commentDto);
+    }
+
+    @Test
+    public void testThatFindByBookIdWithPageableReturnsPageOfComments() {
+        Long bookId = 1L;
+        CommentEntity commentEntity = TestDataUtil.createTestComment(null, null);
+        CommentDto commentDto = CommentDto.builder().id(1L).content("Great book!").build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<CommentEntity> commentPage = new PageImpl<>(List.of(commentEntity));
+
+        when(commentRepository.findByBookIdOrderByCreatedAtDesc(bookId, pageable)).thenReturn(commentPage);
+        when(commentMapper.mapTo(commentEntity)).thenReturn(commentDto);
+
+        Page<CommentDto> result = underTest.findByBookId(bookId, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(commentDto);
+    }
+
+    @Test
+    public void testThatFindByUserIdReturnsListOfComments() {
+        Long userId = 1L;
+        CommentEntity commentEntity = TestDataUtil.createTestComment(null, null);
+        CommentDto commentDto = CommentDto.builder().id(1L).content("Great book!").build();
+
+        when(commentRepository.findByUserId(userId)).thenReturn(List.of(commentEntity));
+        when(commentMapper.mapTo(commentEntity)).thenReturn(commentDto);
+
+        List<CommentDto> result = underTest.findByUserId(userId);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isEqualTo(commentDto);
+    }
+
+    @Test
+    public void testThatAddCommentSucceeds() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        String content = "Amazing book!";
+        UserEntity user = TestDataUtil.createTestUser();
+        user.setId(userId);
+        BookEntity book = TestDataUtil.createTestBook();
+        book.setId(bookId);
+        CommentEntity savedComment = TestDataUtil.createTestComment(user, book);
+        savedComment.setId(1L);
+        savedComment.setContent(content);
+        CommentDto commentDto = CommentDto.builder().id(1L).content(content).build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(commentRepository.save(any(CommentEntity.class))).thenReturn(savedComment);
+        when(commentMapper.mapTo(savedComment)).thenReturn(commentDto);
+
+        CommentDto result = underTest.addComment(userId, bookId, content);
+
+        assertThat(result).isEqualTo(commentDto);
+        verify(commentRepository, times(1)).save(any(CommentEntity.class));
+    }
+
+    @Test
+    public void testThatAddCommentThrowsExceptionWhenUserNotFound() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        String content = "Amazing book!";
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.addComment(userId, bookId, content))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("User not found");
+    }
+
+    @Test
+    public void testThatAddCommentThrowsExceptionWhenBookNotFound() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        String content = "Amazing book!";
+        UserEntity user = TestDataUtil.createTestUser();
+        user.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.addComment(userId, bookId, content))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Book not found");
+    }
+
+    @Test
+    public void testThatCountCommentsForBookReturnsCorrectCount() {
+        Long bookId = 1L;
+        Long expectedCount = 5L;
+
+        when(commentRepository.countByBookId(bookId)).thenReturn(expectedCount);
+
+        Long result = underTest.countCommentsForBook(bookId);
+
+        assertThat(result).isEqualTo(expectedCount);
     }
 }
