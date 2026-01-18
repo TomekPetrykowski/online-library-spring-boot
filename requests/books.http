@@ -42,3 +42,10 @@ Content-Type: application/json
 
 ### Delete Book
 DELETE {{base_url}}/books/{{book_id}}
+
+### Get 5 the most popular books
+GET {{base_url}}/api/v1/books/popular
+
+### Search for books
+GET {{base_url}}/api/v1/books/search?
+    q={{$random.alphanumeric(8)}}
