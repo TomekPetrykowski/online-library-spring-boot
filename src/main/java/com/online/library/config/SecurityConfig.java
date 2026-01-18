@@ -29,7 +29,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index.html", "/login", "/register", "/css/**", "/js/**", "/images/**",
-                                "/api/v1/books/**")
+                                "/api/v1/books/**", "/books/**")
                         .permitAll()
                         .requestMatchers("/dashboard/**").authenticated()
                         .requestMatchers("/api/**").authenticated()
