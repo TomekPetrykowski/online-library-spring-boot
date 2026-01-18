@@ -94,7 +94,7 @@
 
     <!-- Main Content: Book List -->
     <div class="col-md-9">
-      <div th:if="${searchTerm != ''}" class="mb-3">
+      <div th:if="${!#strings.isEmpty(searchTerm)}" class="mb-3">
         <h4>
           Wyniki wyszukiwania dla: "<span th:text="${searchTerm}"></span>"
         </h4>
