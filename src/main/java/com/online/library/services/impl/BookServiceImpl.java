@@ -71,6 +71,18 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    public Page<BookDto> searchBooks(String searchTerm, Pageable pageable) {
+        Page<BookEntity> books = bookRepository.searchBooks(searchTerm, pageable);
+        return books.map(bookMapper::mapTo);
+    }
+
+    @Override
+    public Page<BookDto> getPopularBooks(Pageable pageable) {
+        Page<BookEntity> books = bookRepository.findAllByOrderByAverageRatingDesc(pageable);
+        return books.map(bookMapper::mapTo);
+    }
+
+    @Override
     public void delete(Long id) {
         bookRepository.deleteById(id);
     }

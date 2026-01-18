@@ -158,4 +158,37 @@ public class BookServiceImplTest {
 
         verify(bookRepository, times(1)).deleteById(bookId);
     }
+
+    @Test
+    public void testThatSearchBooksReturnsPageOfBooks() {
+        String searchTerm = "Java";
+        BookEntity bookEntity = TestDataUtil.createTestBook();
+        BookDto bookDto = BookDto.builder().id(1L).title("Java Programming").build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<BookEntity> bookPage = new PageImpl<>(List.of(bookEntity));
+
+        when(bookRepository.searchBooks(searchTerm, pageable)).thenReturn(bookPage);
+        when(bookMapper.mapTo(bookEntity)).thenReturn(bookDto);
+
+        Page<BookDto> result = underTest.searchBooks(searchTerm, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(bookDto);
+    }
+
+    @Test
+    public void testThatGetPopularBooksReturnsPageOfBooks() {
+        BookEntity bookEntity = TestDataUtil.createTestBook();
+        BookDto bookDto = BookDto.builder().id(1L).title("Popular Book").build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<BookEntity> bookPage = new PageImpl<>(List.of(bookEntity));
+
+        when(bookRepository.findAllByOrderByAverageRatingDesc(pageable)).thenReturn(bookPage);
+        when(bookMapper.mapTo(bookEntity)).thenReturn(bookDto);
+
+        Page<BookDto> result = underTest.getPopularBooks(pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(bookDto);
+    }
 }
