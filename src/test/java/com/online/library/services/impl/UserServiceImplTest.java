@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,9 @@ public class UserServiceImplTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserServiceImpl underTest;
@@ -55,6 +59,7 @@ public class UserServiceImplTest {
                 .build();
 
         when(userMapper.mapFromRequest(userRequestDto)).thenReturn(userEntity);
+        when(passwordEncoder.encode(any(CharSequence.class))).thenReturn("encodedPassword");
         when(userRepository.save(userEntity)).thenReturn(userEntity);
         when(userMapper.mapToResponse(userEntity)).thenReturn(userResponseDto);
 
