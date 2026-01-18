@@ -31,7 +31,7 @@ public class UserRequestDto {
     @Size(max = 100, message = "Email must be at most 100 characters")
     private String email;
 
-    @NotNull(message = "Role is required")
+    // @NotNull(message = "Role is required")
     private UserRole role;
 
     private Boolean enabled;
