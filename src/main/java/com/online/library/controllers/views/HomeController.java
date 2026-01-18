@@ -30,7 +30,7 @@ public class HomeController {
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         Page<BookDto> books;
-        if (searchTerm != null && !searchTerm.equals("") && !searchTerm.trim().isEmpty()) {
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             books = bookService.searchBooks(searchTerm, sortedPageable);
         } else {
             books = bookService.findAll(sortedPageable);
