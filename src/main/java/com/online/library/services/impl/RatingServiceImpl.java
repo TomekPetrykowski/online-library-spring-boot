@@ -7,6 +7,8 @@ import com.online.library.mappers.Mapper;
 import com.online.library.repositories.RatingRepository;
 import com.online.library.services.RatingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +35,12 @@ public class RatingServiceImpl implements RatingService {
         return StreamSupport.stream(ratingRepository.findAll().spliterator(), false)
                 .map(ratingMapper::mapTo)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<RatingDto> findAll(Pageable pageable) {
+        Page<RatingEntity> foundRatings = ratingRepository.findAll(pageable);
+        return foundRatings.map(ratingMapper::mapTo);
     }
 
     @Override

@@ -4,6 +4,8 @@ import com.online.library.domain.dto.GenreDto;
 import com.online.library.services.GenreService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +26,8 @@ public class GenreController {
     }
 
     @GetMapping
-    public List<GenreDto> listGenres() {
-        return genreService.findAll();
+    public Page<GenreDto> listGenres(Pageable pageable) {
+        return genreService.findAll(pageable);
     }
 
     @GetMapping("/{id}")

@@ -8,6 +8,8 @@ import com.online.library.repositories.ReservationRepository;
 import com.online.library.services.ReservationService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,6 +36,12 @@ public class ReservationServiceImpl implements ReservationService {
         return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
                 .map(reservationMapper::mapTo)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<ReservationDto> findAll(Pageable pageable) {
+        Page<ReservationEntity> foundReservations = reservationRepository.findAll(pageable);
+        return foundReservations.map(reservationMapper::mapTo);
     }
 
     @Override

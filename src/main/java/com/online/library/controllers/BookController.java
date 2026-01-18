@@ -4,6 +4,8 @@ import com.online.library.domain.dto.BookDto;
 import com.online.library.services.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +26,8 @@ public class BookController {
     }
 
     @GetMapping
-    public List<BookDto> listBooks() {
-        return bookService.findAll();
+    public Page<BookDto> listBooks(Pageable pageable) {
+        return bookService.findAll(pageable);
     }
 
     @GetMapping("/{id}")

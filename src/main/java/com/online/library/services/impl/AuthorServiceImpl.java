@@ -7,6 +7,8 @@ import com.online.library.mappers.Mapper;
 import com.online.library.repositories.AuthorRepository;
 import com.online.library.services.AuthorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +35,12 @@ public class AuthorServiceImpl implements AuthorService {
         return StreamSupport.stream(authorRepository.findAll().spliterator(), false)
                 .map(authorMapper::mapTo)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<AuthorDto> findAll(Pageable pageable) {
+        Page<AuthorEntity> foundAuthors = authorRepository.findAll(pageable);
+        return foundAuthors.map(authorMapper::mapTo);
     }
 
     @Override

@@ -4,6 +4,8 @@ import com.online.library.domain.dto.AuthorDto;
 import com.online.library.services.AuthorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +26,8 @@ public class AuthorController {
     }
 
     @GetMapping
-    public List<AuthorDto> listAuthors() {
-        return authorService.findAll();
+    public Page<AuthorDto> listAuthors(Pageable pageable) {
+        return authorService.findAll(pageable);
     }
 
     @GetMapping("/{id}")

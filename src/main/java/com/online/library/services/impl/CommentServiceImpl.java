@@ -7,6 +7,8 @@ import com.online.library.mappers.Mapper;
 import com.online.library.repositories.CommentRepository;
 import com.online.library.services.CommentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +35,12 @@ public class CommentServiceImpl implements CommentService {
         return StreamSupport.stream(commentRepository.findAll().spliterator(), false)
                 .map(commentMapper::mapTo)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<CommentDto> findAll(Pageable pageable) {
+        Page<CommentEntity> foundComments = commentRepository.findAll(pageable);
+        return foundComments.map(commentMapper::mapTo);
     }
 
     @Override

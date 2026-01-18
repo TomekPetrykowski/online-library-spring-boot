@@ -7,6 +7,8 @@ import com.online.library.mappers.Mapper;
 import com.online.library.repositories.BookRepository;
 import com.online.library.services.BookService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +35,12 @@ public class BookServiceImpl implements BookService {
         return StreamSupport.stream(bookRepository.findAll().spliterator(), false)
                 .map(bookMapper::mapTo)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<BookDto> findAll(Pageable pageable) {
+        Page<BookEntity> foundBooks = bookRepository.findAll(pageable);
+        return foundBooks.map(bookMapper::mapTo);
     }
 
     @Override

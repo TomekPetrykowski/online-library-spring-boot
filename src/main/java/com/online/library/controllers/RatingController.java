@@ -4,6 +4,8 @@ import com.online.library.domain.dto.RatingDto;
 import com.online.library.services.RatingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +26,8 @@ public class RatingController {
     }
 
     @GetMapping
-    public List<RatingDto> listRatings() {
-        return ratingService.findAll();
+    public Page<RatingDto> listRatings(Pageable pageable) {
+        return ratingService.findAll(pageable);
     }
 
     @GetMapping("/{id}")

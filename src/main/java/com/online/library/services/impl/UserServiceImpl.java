@@ -8,6 +8,8 @@ import com.online.library.mappers.impl.UserMapper;
 import com.online.library.repositories.UserRepository;
 import com.online.library.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,6 +36,12 @@ public class UserServiceImpl implements UserService {
         return StreamSupport.stream(userRepository.findAll().spliterator(), false)
                 .map(userMapper::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<UserResponseDto> findAll(Pageable pageable) {
+        Page<UserEntity> foundEntities = userRepository.findAll(pageable);
+        return foundEntities.map(userMapper::mapToResponse);
     }
 
     @Override

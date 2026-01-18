@@ -5,6 +5,8 @@ import com.online.library.domain.dto.UserResponseDto;
 import com.online.library.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +27,8 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserResponseDto> listUsers() {
-        return userService.findAll();
+    public Page<UserResponseDto> listUsers(Pageable pageable) {
+        return userService.findAll(pageable);
     }
 
     @GetMapping("/{id}")

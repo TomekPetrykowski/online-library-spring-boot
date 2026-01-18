@@ -4,6 +4,8 @@ import com.online.library.domain.dto.ReservationDto;
 import com.online.library.services.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +26,8 @@ public class ReservationController {
     }
 
     @GetMapping
-    public List<ReservationDto> listReservations() {
-        return reservationService.findAll();
+    public Page<ReservationDto> listReservations(Pageable pageable) {
+        return reservationService.findAll(pageable);
     }
 
     @GetMapping("/{id}")
