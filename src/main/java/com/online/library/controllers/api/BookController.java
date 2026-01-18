@@ -1,4 +1,4 @@
-package com.online.library.controllers;
+package com.online.library.controllers.api;
 
 import com.online.library.domain.dto.BookDto;
 import com.online.library.services.BookService;
@@ -9,8 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/books")
@@ -28,6 +26,18 @@ public class BookController {
     @GetMapping
     public Page<BookDto> listBooks(Pageable pageable) {
         return bookService.findAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public Page<BookDto> searchBooks(
+            @RequestParam(name = "q", required = false) String searchTerm,
+            Pageable pageable) {
+        return bookService.searchBooks(searchTerm, pageable);
+    }
+
+    @GetMapping("/popular")
+    public Page<BookDto> getPopularBooks(Pageable pageable) {
+        return bookService.getPopularBooks(pageable);
     }
 
     @GetMapping("/{id}")
