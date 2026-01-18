@@ -10,6 +10,7 @@ import com.online.library.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,10 +24,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponseDto save(UserRequestDto userDto) {
         UserEntity userEntity = userMapper.mapFromRequest(userDto);
+        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         UserEntity savedUserEntity = userRepository.save(userEntity);
         return userMapper.mapToResponse(savedUserEntity);
     }
@@ -50,6 +53,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<UserResponseDto> findByUsername(String username) {
+        return userRepository.findByUsername(username).map(userMapper::mapToResponse);
+    }
+
+    @Override
     public boolean isExists(Long id) {
         return userRepository.existsById(id);
     }
@@ -61,7 +69,9 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).map(existingUser -> {
             Optional.ofNullable(userDto.getUsername()).ifPresent(existingUser::setUsername);
             Optional.ofNullable(userDto.getEmail()).ifPresent(existingUser::setEmail);
-            Optional.ofNullable(userDto.getPassword()).ifPresent(existingUser::setPassword);
+            if (userDto.getPassword() != null) {
+                existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            }
             Optional.ofNullable(userDto.getRole()).ifPresent(existingUser::setRole);
             Optional.ofNullable(userDto.getEnabled()).ifPresent(existingUser::setEnabled);
             return userMapper.mapToResponse(userRepository.save(existingUser));

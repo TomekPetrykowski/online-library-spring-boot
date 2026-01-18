@@ -13,6 +13,7 @@ public interface UserService {
     List<UserResponseDto> findAll();
     Page<UserResponseDto> findAll(Pageable pageable);
     Optional<UserResponseDto> findById(Long id);
+    Optional<UserResponseDto> findByUsername(String username);
     boolean isExists(Long id);
     UserResponseDto partialUpdate(Long id, UserRequestDto userDto);
     void delete(Long id);
