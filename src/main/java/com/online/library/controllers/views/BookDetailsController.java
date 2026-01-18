@@ -30,6 +30,11 @@ public class BookDetailsController {
     private final CommentService commentService;
     private final UserService userService;
 
+    @GetMapping("/")
+    public String mainPage(){
+        return "redirect:/";
+    }
+
     @GetMapping("/{id}")
     public String bookDetails(
             @PathVariable Long id,
