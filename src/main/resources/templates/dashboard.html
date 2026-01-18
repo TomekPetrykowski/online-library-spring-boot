@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: header('Panel użytkownika')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informacje o profilu</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Użytkownik:</strong> <span th:text="${user.username}"></span></p>
+                    <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+                    <p><strong>Rola:</strong> <span th:text="${user.role}"></span></p>
+                    <p><strong>Konto od:</strong> <span th:text="${#temporals.format(user.createdAt, 'dd.MM.yyyy HH:mm')}"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Moje rezerwacje</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(reservations)}" class="alert alert-info">
+                        Nie masz jeszcze żadnych rezerwacji.
+                    </div>
+                    
+                    <div th:if="${!#lists.isEmpty(reservations)}" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Książka</th>
+                                    <th>Data rezerwacji</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="res : ${reservations}">
+                                    <td th:text="${res.book.title}">Tytuł</td>
+                                    <td th:text="${#temporals.format(res.reservedAt, 'dd.MM.yyyy HH:mm')}">Data</td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${res.status.name() == 'OCZEKUJĄCA' ? 'bg-warning' : 
+                                                              (res.status.name() == 'POTWIERDZONA' ? 'bg-info' : 
+                                                              (res.status.name() == 'WYPOŻYCZONA' ? 'bg-primary' : 'bg-success'))}"
+                                              th:text="${res.status}">Status</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>
