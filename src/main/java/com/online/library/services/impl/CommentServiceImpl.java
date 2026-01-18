@@ -1,10 +1,14 @@
 package com.online.library.services.impl;
 
 import com.online.library.domain.dto.CommentDto;
+import com.online.library.domain.entities.BookEntity;
 import com.online.library.domain.entities.CommentEntity;
+import com.online.library.domain.entities.UserEntity;
 import com.online.library.exceptions.ResourceNotFoundException;
 import com.online.library.mappers.Mapper;
+import com.online.library.repositories.BookRepository;
 import com.online.library.repositories.CommentRepository;
+import com.online.library.repositories.UserRepository;
 import com.online.library.services.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +25,8 @@ import java.util.stream.StreamSupport;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
+    private final BookRepository bookRepository;
     private final Mapper<CommentEntity, CommentDto> commentMapper;
 
     @Override
@@ -66,5 +72,47 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void delete(Long id) {
         commentRepository.deleteById(id);
+    }
+
+    @Override
+    public List<CommentDto> findByBookId(Long bookId) {
+        return commentRepository.findByBookIdOrderByCreatedAtDesc(bookId).stream()
+                .map(commentMapper::mapTo)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<CommentDto> findByBookId(Long bookId, Pageable pageable) {
+        return commentRepository.findByBookIdOrderByCreatedAtDesc(bookId, pageable)
+                .map(commentMapper::mapTo);
+    }
+
+    @Override
+    public List<CommentDto> findByUserId(Long userId) {
+        return commentRepository.findByUserId(userId).stream()
+                .map(commentMapper::mapTo)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public CommentDto addComment(Long userId, Long bookId, String content) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        BookEntity book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
+
+        CommentEntity comment = CommentEntity.builder()
+                .user(user)
+                .book(book)
+                .content(content)
+                .build();
+
+        CommentEntity savedComment = commentRepository.save(comment);
+        return commentMapper.mapTo(savedComment);
+    }
+
+    @Override
+    public Long countCommentsForBook(Long bookId) {
+        return commentRepository.countByBookId(bookId);
     }
 }
