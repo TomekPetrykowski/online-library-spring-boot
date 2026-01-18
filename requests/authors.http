@@ -16,6 +16,9 @@ GET {{base_url}}/authors
 ### Get Author
 GET {{base_url}}/authors/{{author_id}}
 
+### Get Author Manual
+GET {{base_url}}/authors/1
+
 ### Full Update Author
 PUT {{base_url}}/authors/{{author_id}}
 Content-Type: application/json
