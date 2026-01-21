@@ -1,42 +1,19 @@
 <!doctype html>
-<html
-  xmlns:th="http://www.thymeleaf.org"
-  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
->
-  <head
-    th:replace="~{fragments/layout :: header('Szczegóły książki - System Biblioteczny OnLajn')}"
-  ></head>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head th:replace="~{fragments/layout :: header('Szczegóły książki - System Biblioteczny OnLajn')}"></head>
   <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
       <!-- Flash Messages -->
-      <div
-        th:if="${success}"
-        class="alert alert-success alert-dismissible fade show"
-        role="alert"
-      >
+      <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
-      <div
-        th:if="${error}"
-        class="alert alert-danger alert-dismissible fade show"
-        role="alert"
-      >
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
         <i class="bi bi-exclamation-triangle"></i>
         <span th:text="${error}"></span>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
 
       <!-- Back to Home -->
@@ -55,49 +32,45 @@
               th:src="${book.coverImagePath}"
               class="card-img-top"
               alt="Book cover"
-              style="max-height: 400px; object-fit: cover"
-            />
+              style="max-height: 400px; object-fit: cover" />
             <div
               th:unless="${book.coverImagePath}"
               class="bg-secondary text-white d-flex align-items-center justify-content-center"
-              style="height: 400px"
-            >
+              style="height: 400px">
               <i class="bi bi-book" style="font-size: 6rem"></i>
             </div>
             <div class="card-body">
-              <div
-                class="d-flex justify-content-between align-items-center mb-2"
-              >
-                <span
-                  class="badge bg-success"
-                  th:if="${book.copiesAvailable > 0}"
-                >
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-success" th:if="${hasAvailableCopies}">
                   <i class="bi bi-check-circle"></i> Dostępne:
                   <span th:text="${book.copiesAvailable}">5</span>
                 </span>
-                <span
-                  class="badge bg-danger"
-                  th:unless="${book.copiesAvailable > 0}"
-                >
+                <span class="badge bg-danger" th:unless="${hasAvailableCopies}">
                   <i class="bi bi-x-circle"></i> Niedostępne
                 </span>
               </div>
+
               <div class="text-center">
-                <a
-                  th:href="@{/dashboard/reservations}"
-                  class="btn btn-primary w-100"
-                  sec:authorize="isAuthenticated()"
-                  th:if="${book.copiesAvailable > 0}"
-                >
-                  <i class="bi bi-bookmark-plus"></i> Zarezerwuj
-                </a>
-                <a
-                  th:href="@{/login}"
-                  class="btn btn-outline-primary w-100"
-                  sec:authorize="isAnonymous()"
-                >
-                  <i class="bi bi-box-arrow-in-right"></i> Zaloguj się, aby
-                  zarezerwować
+                <!-- Reserve button - only for authenticated users who can reserve -->
+                <div sec:authorize="isAuthenticated()">
+                  <form th:if="${canReserve}" th:action="@{/books/{id}/reserve(id=${book.id})}" method="post">
+                    <button type="submit" class="btn btn-primary w-100">
+                      <i class="bi bi-bookmark-plus"></i> Zarezerwuj
+                    </button>
+                  </form>
+                  <div th:unless="${canReserve}">
+                    <div th:if="${activeReservation != null}" class="text-muted small">
+                      <i class="bi bi-info-circle"></i> Masz już aktywną rezerwację tej książki.
+                    </div>
+                    <div th:if="${activeReservation == null && !hasAvailableCopies}" class="text-muted small">
+                      <i class="bi bi-exclamation-circle"></i> Brak dostępnych egzemplarzy do rezerwacji.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Login prompt for anonymous users -->
+                <a th:href="@{/login}" class="btn btn-outline-primary w-100" sec:authorize="isAnonymous()">
+                  <i class="bi bi-box-arrow-in-right"></i> Zaloguj się, aby zarezerwować
                 </a>
               </div>
             </div>
@@ -118,33 +91,21 @@
                     <i
                       th:each="i : ${#numbers.sequence(1, 5)}"
                       th:class="${i <= averageRating.intValue()} ? 'bi bi-star-fill' : 'bi bi-star'"
-                      style="font-size: 1.5rem"
-                    ></i>
+                      style="font-size: 1.5rem"></i>
                   </span>
-                  <span
-                    class="h4 mb-0 me-2"
-                    th:text="${#numbers.formatDecimal(averageRating, 1, 1)}"
-                    >4.5</span
-                  >
-                  <small class="text-muted"
-                    >(<span th:text="${ratingCount}">10</span> ocen)</small
-                  >
+                  <span class="h4 mb-0 me-2" th:text="${#numbers.formatDecimal(averageRating, 1, 1)}">4.5</span>
+                  <small class="text-muted">(<span th:text="${ratingCount}">10</span> ocen)</small>
                 </div>
               </div>
 
               <!-- Metadata -->
               <table class="table table-borderless">
                 <tbody>
-                  <tr
-                    th:if="${book.authors != null && !book.authors.isEmpty()}"
-                  >
-                    <th scope="row" style="width: 150px">
-                      <i class="bi bi-person"></i> Autorzy:
-                    </th>
+                  <tr th:if="${book.authors != null && !book.authors.isEmpty()}">
+                    <th scope="row" style="width: 150px"> <i class="bi bi-person"></i> Autorzy: </th>
                     <td>
                       <span th:each="author, iterStat : ${book.authors}">
-                        <span th:text="${author.name + ' ' + author.lastName}"
-                          >Jan Kowalski</span
+                        <span th:text="${author.name + ' ' + author.lastName}">Jan Kowalski</span
                         ><span th:if="${!iterStat.last}">, </span>
                       </span>
                     </td>
@@ -165,9 +126,7 @@
                     <td th:text="${book.publisher}">Wydawnictwo XYZ</td>
                   </tr>
                   <tr th:if="${book.publishYear != null}">
-                    <th scope="row">
-                      <i class="bi bi-calendar"></i> Rok wydania:
-                    </th>
+                    <th scope="row"> <i class="bi bi-calendar"></i> Rok wydania: </th>
                     <td th:text="${book.publishYear}">2023</td>
                   </tr>
                   <tr th:if="${book.isbn != null}">
@@ -178,13 +137,9 @@
               </table>
 
               <!-- Description -->
-              <div
-                th:if="${book.description != null && book.description != ''}"
-              >
+              <div th:if="${book.description != null && book.description != ''}">
                 <h5><i class="bi bi-file-text"></i> Opis</h5>
-                <p class="text-muted" th:text="${book.description}">
-                  Opis książki...
-                </p>
+                <p class="text-muted" th:text="${book.description}"> Opis książki... </p>
               </div>
             </div>
           </div>
@@ -192,48 +147,29 @@
           <!-- Rating Module -->
           <div class="card mb-4">
             <div class="card-header bg-warning text-dark">
-              <h5 class="mb-0">
-                <i class="bi bi-star-fill"></i> Oceń tę książkę
-              </h5>
+              <h5 class="mb-0"> <i class="bi bi-star-fill"></i> Oceń tę książkę </h5>
             </div>
             <div class="card-body">
               <div sec:authorize="isAuthenticated()">
-                <div th:if="${canRate}">
-                  <p class="text-muted mb-3">
-                    Wybierz swoją ocenę (1-5 gwiazdek):
-                  </p>
-                  <form
-                    th:action="@{/books/{id}/rate(id=${book.id})}"
-                    method="post"
-                    class="rating-form"
-                  >
-                    <div class="star-rating mb-3">
-                      <input type="radio" id="star5" name="rating" value="5" />
-                      <label for="star5" class="bi bi-star-fill"></label>
-                      <input type="radio" id="star4" name="rating" value="4" />
-                      <label for="star4" class="bi bi-star-fill"></label>
-                      <input type="radio" id="star3" name="rating" value="3" />
-                      <label for="star3" class="bi bi-star-fill"></label>
-                      <input type="radio" id="star2" name="rating" value="2" />
-                      <label for="star2" class="bi bi-star-fill"></label>
-                      <input type="radio" id="star1" name="rating" value="1" />
-                      <label for="star1" class="bi bi-star-fill"></label>
-                    </div>
-                    <button type="submit" class="btn btn-warning">
-                      <i class="bi bi-send"></i> Oceń
-                    </button>
-                  </form>
-                </div>
-                <div th:unless="${canRate}">
-                  <div class="alert alert-info mb-0">
-                    <i class="bi bi-info-circle"></i>
-                    Oceniłeś już tę książkę
-                    <span th:if="${userRating != null}">
-                      (<span th:text="${userRating}">5</span>
-                      <i class="bi bi-star-fill text-warning"></i>) </span
-                    >. Możesz ocenić ponownie za tydzień.
+                <p class="text-muted mb-3"> Wybierz swoją ocenę (1-5 gwiazdek): </p>
+                <form th:action="@{/books/{id}/rate(id=${book.id})}" method="post" class="rating-form">
+                  <div class="star-rating mb-3">
+                    <input type="radio" id="star5" name="rating" value="5" th:checked="${userRating == 5}" />
+                    <label for="star5" class="bi bi-star-fill"></label>
+                    <input type="radio" id="star4" name="rating" value="4" th:checked="${userRating == 4}" />
+                    <label for="star4" class="bi bi-star-fill"></label>
+                    <input type="radio" id="star3" name="rating" value="3" th:checked="${userRating == 3}" />
+                    <label for="star3" class="bi bi-star-fill"></label>
+                    <input type="radio" id="star2" name="rating" value="2" th:checked="${userRating == 2}" />
+                    <label for="star2" class="bi bi-star-fill"></label>
+                    <input type="radio" id="star1" name="rating" value="1" th:checked="${userRating == 1}" />
+                    <label for="star1" class="bi bi-star-fill"></label>
                   </div>
-                </div>
+                  <button type="submit" class="btn btn-warning">
+                    <i class="bi bi-send"></i>
+                    <span>Oceń</span>
+                  </button>
+                </form>
               </div>
               <div sec:authorize="isAnonymous()">
                 <div class="alert alert-secondary mb-0">
@@ -249,30 +185,22 @@
             <div class="card-header bg-info text-white">
               <h5 class="mb-0">
                 <i class="bi bi-chat-dots"></i> Komentarze
-                <span class="badge bg-light text-dark" th:text="${commentCount}"
-                  >0</span
-                >
+                <span class="badge bg-light text-dark" th:text="${commentCount}">0</span>
               </h5>
             </div>
             <div class="card-body">
               <!-- Add Comment Form -->
               <div sec:authorize="isAuthenticated()" class="mb-4">
-                <form
-                  th:action="@{/books/{id}/comment(id=${book.id})}"
-                  method="post"
-                >
+                <form th:action="@{/books/{id}/comment(id=${book.id})}" method="post">
                   <div class="mb-3">
-                    <label for="content" class="form-label"
-                      >Dodaj komentarz:</label
-                    >
+                    <label for="content" class="form-label">Dodaj komentarz:</label>
                     <textarea
                       class="form-control"
                       id="content"
                       name="content"
                       rows="3"
                       placeholder="Napisz swój komentarz..."
-                      required
-                    ></textarea>
+                      required></textarea>
                   </div>
                   <button type="submit" class="btn btn-info text-white">
                     <i class="bi bi-send"></i> Dodaj komentarz
@@ -287,10 +215,7 @@
               </div>
 
               <!-- Comments List -->
-              <div
-                th:if="${comments.isEmpty()}"
-                class="text-center text-muted py-4"
-              >
+              <div th:if="${comments.isEmpty()}" class="text-center text-muted py-4">
                 <i class="bi bi-chat" style="font-size: 3rem"></i>
                 <p class="mt-2">Brak komentarzy. Bądź pierwszy!</p>
               </div>
@@ -305,45 +230,30 @@
                       </h6>
                       <small class="text-muted">
                         <i class="bi bi-clock"></i>
-                        <span
-                          th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}"
+                        <span th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}"
                           >01.01.2024 12:00</span
                         >
                       </small>
                     </div>
-                    <p class="card-text" th:text="${comment.content}">
-                      Treść komentarza...
-                    </p>
+                    <p class="card-text" th:text="${comment.content}"> Treść komentarza... </p>
                   </div>
                 </div>
 
                 <!-- Comments Pagination -->
                 <nav th:if="${comments.totalPages > 1}" class="mt-4">
                   <ul class="pagination justify-content-center">
-                    <li
-                      class="page-item"
-                      th:classappend="${comments.first} ? 'disabled'"
-                    >
-                      <a
-                        class="page-link"
-                        th:href="@{/books/{id}(id=${book.id}, commentPage=${comments.number - 1})}"
+                    <li class="page-item" th:classappend="${comments.first} ? 'disabled'">
+                      <a class="page-link" th:href="@{/books/{id}(id=${book.id}, commentPage=${comments.number - 1})}"
                         >Poprzednia</a
                       >
                     </li>
                     <li class="page-item disabled">
-                      <span
-                        class="page-link"
-                        th:text="${comments.number + 1 + ' / ' + comments.totalPages}"
+                      <span class="page-link" th:text="${comments.number + 1 + ' / ' + comments.totalPages}"
                         >1 / 5</span
                       >
                     </li>
-                    <li
-                      class="page-item"
-                      th:classappend="${comments.last} ? 'disabled'"
-                    >
-                      <a
-                        class="page-link"
-                        th:href="@{/books/{id}(id=${book.id}, commentPage=${comments.number + 1})}"
+                    <li class="page-item" th:classappend="${comments.last} ? 'disabled'">
+                      <a class="page-link" th:href="@{/books/{id}(id=${book.id}, commentPage=${comments.number + 1})}"
                         >Następna</a
                       >
                     </li>

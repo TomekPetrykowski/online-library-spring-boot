@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,15 +21,11 @@ public interface RatingRepository extends JpaRepository<RatingEntity, Long> {
 
     Optional<RatingEntity> findByUserAndBook(UserEntity user, BookEntity book);
 
-    @Query("SELECT r FROM RatingEntity r WHERE r.user = :user AND r.book = :book AND r.createdAt >= :since")
-    Optional<RatingEntity> findRecentRatingByUserAndBook(
-            @Param("user") UserEntity user,
-            @Param("book") BookEntity book,
-            @Param("since") LocalDateTime since);
-
     @Query("SELECT AVG(r.rating) FROM RatingEntity r WHERE r.book.id = :bookId")
     Optional<BigDecimal> calculateAverageRatingByBookId(@Param("bookId") Long bookId);
 
     @Query("SELECT COUNT(r) FROM RatingEntity r WHERE r.book.id = :bookId")
     Long countRatingsByBookId(@Param("bookId") Long bookId);
+
+    boolean existsByUserAndBook(UserEntity user, BookEntity book);
 }

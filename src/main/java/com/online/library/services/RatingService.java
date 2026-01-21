@@ -11,9 +11,7 @@ public interface RatingService extends BaseService<RatingDto, Long> {
 
     List<RatingDto> findByUserId(Long userId);
 
-    boolean canUserRateBook(Long userId, Long bookId);
-
-    RatingDto addRating(Long userId, Long bookId, Integer rating);
+    RatingDto rateBook(Long userId, Long bookId, Integer rating);
 
     BigDecimal calculateAverageRating(Long bookId);
 

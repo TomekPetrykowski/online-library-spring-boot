@@ -8,8 +8,6 @@ import java.util.List;
 
 public interface CommentService extends BaseService<CommentDto, Long> {
 
-    List<CommentDto> findByBookId(Long bookId);
-
     Page<CommentDto> findByBookId(Long bookId, Pageable pageable);
 
     List<CommentDto> findByUserId(Long userId);

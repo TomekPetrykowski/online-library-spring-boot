@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "ratings", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "book_id", "created_at"})
+        @UniqueConstraint(columnNames = { "user_id", "book_id" })
 })
 public class RatingEntity {
 

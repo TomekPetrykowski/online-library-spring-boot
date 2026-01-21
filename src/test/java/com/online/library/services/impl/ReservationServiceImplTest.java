@@ -53,20 +53,6 @@ public class ReservationServiceImplTest {
     }
 
     @Test
-    public void testThatFindAllReturnsListOfReservations() {
-        ReservationEntity reservationEntity = TestDataUtil.createTestReservation(null, null);
-        ReservationDto reservationDto = ReservationDto.builder().id(1L).status(ReservationStatus.OCZEKUJĄCA).build();
-
-        when(reservationRepository.findAll()).thenReturn(List.of(reservationEntity));
-        when(reservationMapper.mapTo(reservationEntity)).thenReturn(reservationDto);
-
-        List<ReservationDto> result = underTest.findAll();
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo(reservationDto);
-    }
-
-    @Test
     public void testThatFindAllWithPageableReturnsPageOfReservations() {
         ReservationEntity reservationEntity = TestDataUtil.createTestReservation(null, null);
         ReservationDto reservationDto = ReservationDto.builder().id(1L).status(ReservationStatus.OCZEKUJĄCA).build();
@@ -122,7 +108,8 @@ public class ReservationServiceImplTest {
         existingReservation.setId(reservationId);
 
         ReservationDto updateDto = ReservationDto.builder().status(ReservationStatus.POTWIERDZONA).build();
-        ReservationDto updatedDto = ReservationDto.builder().id(reservationId).status(ReservationStatus.POTWIERDZONA).build();
+        ReservationDto updatedDto = ReservationDto.builder().id(reservationId).status(ReservationStatus.POTWIERDZONA)
+                .build();
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(existingReservation));
         when(reservationRepository.save(any(ReservationEntity.class))).thenReturn(existingReservation);

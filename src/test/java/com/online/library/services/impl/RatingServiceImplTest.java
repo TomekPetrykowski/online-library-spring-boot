@@ -21,14 +21,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,20 +60,6 @@ public class RatingServiceImplTest {
 
         assertThat(result).isEqualTo(ratingDto);
         verify(ratingRepository, times(1)).save(ratingEntity);
-    }
-
-    @Test
-    public void testThatFindAllReturnsListOfRatings() {
-        RatingEntity ratingEntity = TestDataUtil.createTestRating(null, null);
-        RatingDto ratingDto = RatingDto.builder().id(1L).rating(5).build();
-
-        when(ratingRepository.findAll()).thenReturn(List.of(ratingEntity));
-        when(ratingMapper.mapTo(ratingEntity)).thenReturn(ratingDto);
-
-        List<RatingDto> result = underTest.findAll();
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo(ratingDto);
     }
 
     @Test
@@ -199,73 +183,7 @@ public class RatingServiceImplTest {
     }
 
     @Test
-    public void testThatCanUserRateBookReturnsTrueWhenNoRecentRating() {
-        Long userId = 1L;
-        Long bookId = 1L;
-        UserEntity user = TestDataUtil.createTestUser();
-        user.setId(userId);
-        BookEntity book = TestDataUtil.createTestBook();
-        book.setId(bookId);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(ratingRepository.findRecentRatingByUserAndBook(eq(user), eq(book), any(LocalDateTime.class)))
-                .thenReturn(Optional.empty());
-
-        boolean result = underTest.canUserRateBook(userId, bookId);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void testThatCanUserRateBookReturnsFalseWhenRecentRatingExists() {
-        Long userId = 1L;
-        Long bookId = 1L;
-        UserEntity user = TestDataUtil.createTestUser();
-        user.setId(userId);
-        BookEntity book = TestDataUtil.createTestBook();
-        book.setId(bookId);
-        RatingEntity recentRating = TestDataUtil.createTestRating(user, book);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(ratingRepository.findRecentRatingByUserAndBook(eq(user), eq(book), any(LocalDateTime.class)))
-                .thenReturn(Optional.of(recentRating));
-
-        boolean result = underTest.canUserRateBook(userId, bookId);
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    public void testThatCanUserRateBookThrowsExceptionWhenUserNotFound() {
-        Long userId = 1L;
-        Long bookId = 1L;
-
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> underTest.canUserRateBook(userId, bookId))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("User not found");
-    }
-
-    @Test
-    public void testThatCanUserRateBookThrowsExceptionWhenBookNotFound() {
-        Long userId = 1L;
-        Long bookId = 1L;
-        UserEntity user = TestDataUtil.createTestUser();
-        user.setId(userId);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> underTest.canUserRateBook(userId, bookId))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Book not found");
-    }
-
-    @Test
-    public void testThatAddRatingSucceedsWhenUserCanRate() {
+    public void testThatRateBookCreatesNewRatingWhenNoExisting() {
         Long userId = 1L;
         Long bookId = 1L;
         Integer ratingValue = 4;
@@ -280,13 +198,12 @@ public class RatingServiceImplTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(ratingRepository.findRecentRatingByUserAndBook(eq(user), eq(book), any(LocalDateTime.class)))
-                .thenReturn(Optional.empty());
+        when(ratingRepository.findByUserAndBook(user, book)).thenReturn(Optional.empty());
         when(ratingRepository.save(any(RatingEntity.class))).thenReturn(savedRating);
         when(ratingRepository.calculateAverageRatingByBookId(bookId)).thenReturn(Optional.of(new BigDecimal("4.00")));
         when(ratingMapper.mapTo(savedRating)).thenReturn(ratingDto);
 
-        RatingDto result = underTest.addRating(userId, bookId, ratingValue);
+        RatingDto result = underTest.rateBook(userId, bookId, ratingValue);
 
         assertThat(result).isEqualTo(ratingDto);
         verify(ratingRepository, times(1)).save(any(RatingEntity.class));
@@ -294,24 +211,58 @@ public class RatingServiceImplTest {
     }
 
     @Test
-    public void testThatAddRatingThrowsExceptionWhenUserCannotRate() {
+    public void testThatRateBookUpdatesExistingRating() {
         Long userId = 1L;
         Long bookId = 1L;
-        Integer ratingValue = 4;
+        Integer newRatingValue = 5;
         UserEntity user = TestDataUtil.createTestUser();
         user.setId(userId);
         BookEntity book = TestDataUtil.createTestBook();
         book.setId(bookId);
-        RatingEntity recentRating = TestDataUtil.createTestRating(user, book);
+        RatingEntity existingRating = TestDataUtil.createTestRating(user, book);
+        existingRating.setId(1L);
+        existingRating.setRating(3);
+        RatingDto ratingDto = RatingDto.builder().id(1L).rating(newRatingValue).build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(ratingRepository.findRecentRatingByUserAndBook(eq(user), eq(book), any(LocalDateTime.class)))
-                .thenReturn(Optional.of(recentRating));
+        when(ratingRepository.findByUserAndBook(user, book)).thenReturn(Optional.of(existingRating));
+        when(ratingRepository.save(existingRating)).thenReturn(existingRating);
+        when(ratingRepository.calculateAverageRatingByBookId(bookId)).thenReturn(Optional.of(new BigDecimal("5.00")));
+        when(ratingMapper.mapTo(existingRating)).thenReturn(ratingDto);
 
-        assertThatThrownBy(() -> underTest.addRating(userId, bookId, ratingValue))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("User can only rate a book once per week");
+        RatingDto result = underTest.rateBook(userId, bookId, newRatingValue);
+
+        assertThat(result.getRating()).isEqualTo(newRatingValue);
+        assertThat(existingRating.getRating()).isEqualTo(newRatingValue);
+        verify(ratingRepository, times(1)).save(existingRating);
+    }
+
+    @Test
+    public void testThatRateBookThrowsExceptionWhenUserNotFound() {
+        Long userId = 1L;
+        Long bookId = 1L;
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.rateBook(userId, bookId, 5))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("User not found");
+    }
+
+    @Test
+    public void testThatRateBookThrowsExceptionWhenBookNotFound() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        UserEntity user = TestDataUtil.createTestUser();
+        user.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.rateBook(userId, bookId, 5))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Book not found");
     }
 
     @Test

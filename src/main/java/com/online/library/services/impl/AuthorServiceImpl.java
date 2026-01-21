@@ -11,10 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -28,13 +25,6 @@ public class AuthorServiceImpl implements AuthorService {
         AuthorEntity authorEntity = authorMapper.mapFrom(authorDto);
         AuthorEntity savedAuthorEntity = authorRepository.save(authorEntity);
         return authorMapper.mapTo(savedAuthorEntity);
-    }
-
-    @Override
-    public List<AuthorDto> findAll() {
-        return StreamSupport.stream(authorRepository.findAll().spliterator(), false)
-                .map(authorMapper::mapTo)
-                .collect(Collectors.toList());
     }
 
     @Override

@@ -2,12 +2,10 @@ package com.online.library.controllers.views;
 
 import com.online.library.domain.dto.BookDto;
 import com.online.library.domain.dto.CommentDto;
+import com.online.library.domain.dto.ReservationDto;
 import com.online.library.domain.dto.UserResponseDto;
 import com.online.library.exceptions.ResourceNotFoundException;
-import com.online.library.services.BookService;
-import com.online.library.services.CommentService;
-import com.online.library.services.RatingService;
-import com.online.library.services.UserService;
+import com.online.library.services.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/books")
@@ -26,12 +25,13 @@ import java.security.Principal;
 public class BookDetailsController {
 
     private final BookService bookService;
+    private final ReservationService reservationService;
     private final RatingService ratingService;
     private final CommentService commentService;
     private final UserService userService;
 
     @GetMapping("/")
-    public String mainPage(){
+    public String mainPage() {
         return "redirect:/";
     }
 
@@ -58,14 +58,24 @@ public class BookDetailsController {
         model.addAttribute("comments", comments);
         model.addAttribute("commentCount", commentCount);
 
+        // Check if copies are available
+        boolean hasAvailableCopies = reservationService.hasAvailableCopies(id);
+        model.addAttribute("hasAvailableCopies", hasAvailableCopies);
+
         if (principal != null) {
             UserResponseDto currentUser = userService.findByUsername(principal.getName())
                     .orElse(null);
             if (currentUser != null) {
                 model.addAttribute("currentUser", currentUser);
-                model.addAttribute("canRate", ratingService.canUserRateBook(currentUser.getId(), id));
                 Integer userRating = ratingService.getUserRatingForBook(currentUser.getId(), id);
                 model.addAttribute("userRating", userRating);
+
+                boolean canReserve = reservationService.canUserReserveBook(currentUser.getId(), id);
+                model.addAttribute("canReserve", canReserve);
+
+                Optional<ReservationDto> activeReservation = reservationService
+                        .getActiveReservation(currentUser.getId(), id);
+                activeReservation.ifPresent(res -> model.addAttribute("activeReservation", res));
             }
         }
 
@@ -92,12 +102,8 @@ public class BookDetailsController {
         UserResponseDto currentUser = userService.findByUsername(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        try {
-            ratingService.addRating(currentUser.getId(), id, rating);
-            redirectAttributes.addFlashAttribute("success", "Dziękujemy za ocenę!");
-        } catch (IllegalStateException e) {
-            redirectAttributes.addFlashAttribute("error", "Możesz ocenić tę książkę tylko raz na tydzień.");
-        }
+        ratingService.rateBook(currentUser.getId(), id, rating);
+        redirectAttributes.addFlashAttribute("success", "Dziękujemy za ocenę!");
 
         return "redirect:/books/" + id;
     }
@@ -124,6 +130,31 @@ public class BookDetailsController {
 
         commentService.addComment(currentUser.getId(), id, content.trim());
         redirectAttributes.addFlashAttribute("success", "Komentarz został dodany!");
+
+        return "redirect:/books/" + id;
+    }
+
+    @PostMapping("/{id}/reserve")
+    public String reserveBook(
+            @PathVariable Long id,
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
+
+        if (principal == null) {
+            redirectAttributes.addFlashAttribute("error", "Musisz być zalogowany, aby zarezerwować książkę.");
+            return "redirect:/login";
+        }
+
+        UserResponseDto currentUser = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        try {
+            reservationService.createReservation(currentUser.getId(), id);
+            redirectAttributes.addFlashAttribute("success",
+                    "Rezerwacja została utworzona! Przejdź do panelu użytkownika, aby ją potwierdzić.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
 
         return "redirect:/books/" + id;
     }

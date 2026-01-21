@@ -8,6 +8,7 @@ import com.online.library.mappers.impl.UserMapper;
 import com.online.library.repositories.UserRepository;
 import com.online.library.services.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -28,9 +30,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto save(UserRequestDto userDto) {
+        log.info("Creating new user: {}", userDto.getUsername());
         UserEntity userEntity = userMapper.mapFromRequest(userDto);
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         UserEntity savedUserEntity = userRepository.save(userEntity);
+        log.debug("User created with id: {}", savedUserEntity.getId());
         return userMapper.mapToResponse(savedUserEntity);
     }
 

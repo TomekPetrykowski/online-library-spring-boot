@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -34,13 +33,6 @@ public class CommentServiceImpl implements CommentService {
         CommentEntity commentEntity = commentMapper.mapFrom(commentDto);
         CommentEntity savedCommentEntity = commentRepository.save(commentEntity);
         return commentMapper.mapTo(savedCommentEntity);
-    }
-
-    @Override
-    public List<CommentDto> findAll() {
-        return StreamSupport.stream(commentRepository.findAll().spliterator(), false)
-                .map(commentMapper::mapTo)
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -72,13 +64,6 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void delete(Long id) {
         commentRepository.deleteById(id);
-    }
-
-    @Override
-    public List<CommentDto> findByBookId(Long bookId) {
-        return commentRepository.findByBookIdOrderByCreatedAtDesc(bookId).stream()
-                .map(commentMapper::mapTo)
-                .collect(Collectors.toList());
     }
 
     @Override

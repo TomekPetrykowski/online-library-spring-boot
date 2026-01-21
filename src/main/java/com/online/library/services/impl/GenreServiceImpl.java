@@ -11,10 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -28,13 +25,6 @@ public class GenreServiceImpl implements GenreService {
         GenreEntity genreEntity = genreMapper.mapFrom(genreDto);
         GenreEntity savedGenreEntity = genreRepository.save(genreEntity);
         return genreMapper.mapTo(savedGenreEntity);
-    }
-
-    @Override
-    public List<GenreDto> findAll() {
-        return StreamSupport.stream(genreRepository.findAll().spliterator(), false)
-                .map(genreMapper::mapTo)
-                .collect(Collectors.toList());
     }
 
     @Override

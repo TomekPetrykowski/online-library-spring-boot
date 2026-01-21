@@ -52,20 +52,6 @@ public class GenreServiceImplTest {
     }
 
     @Test
-    public void testThatFindAllReturnsListOfGenres() {
-        GenreEntity genreEntity = TestDataUtil.createTestGenre();
-        GenreDto genreDto = GenreDto.builder().id(1L).name("Horror").build();
-
-        when(genreRepository.findAll()).thenReturn(List.of(genreEntity));
-        when(genreMapper.mapTo(genreEntity)).thenReturn(genreDto);
-
-        List<GenreDto> result = underTest.findAll();
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo(genreDto);
-    }
-
-    @Test
     public void testThatFindAllWithPageableReturnsPageOfGenres() {
         GenreEntity genreEntity = TestDataUtil.createTestGenre();
         GenreDto genreDto = GenreDto.builder().id(1L).name("Horror").build();

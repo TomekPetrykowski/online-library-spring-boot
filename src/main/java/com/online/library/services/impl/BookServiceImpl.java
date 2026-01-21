@@ -7,15 +7,14 @@ import com.online.library.mappers.Mapper;
 import com.online.library.repositories.BookRepository;
 import com.online.library.services.BookService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
@@ -25,16 +24,11 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto save(BookDto bookDto) {
+        log.info("Zapisywanie książki: {}", bookDto.getTitle());
         BookEntity bookEntity = bookMapper.mapFrom(bookDto);
         BookEntity savedBookEntity = bookRepository.save(bookEntity);
+        log.debug("Książka zapisana z id: {}", savedBookEntity.getId());
         return bookMapper.mapTo(savedBookEntity);
-    }
-
-    @Override
-    public List<BookDto> findAll() {
-        return StreamSupport.stream(bookRepository.findAll().spliterator(), false)
-                .map(bookMapper::mapTo)
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -45,6 +39,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Optional<BookDto> findById(Long id) {
+        log.debug("Znajdowanie książki o id: {}", id);
         return bookRepository.findById(id).map(bookMapper::mapTo);
     }
 
@@ -84,6 +79,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public void delete(Long id) {
+        log.info("Usuwanie książki o id: {}", id);
         bookRepository.deleteById(id);
     }
 }

@@ -56,20 +56,6 @@ public class AuthorServiceImplTest {
     }
 
     @Test
-    public void testThatFindAllReturnsListOfAuthors() {
-        AuthorEntity authorEntity = TestDataUtil.createTestAuthor();
-        AuthorDto authorDto = AuthorDto.builder().id(1L).name("H.P.").build();
-
-        when(authorRepository.findAll()).thenReturn(List.of(authorEntity));
-        when(authorMapper.mapTo(authorEntity)).thenReturn(authorDto);
-
-        List<AuthorDto> result = underTest.findAll();
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo(authorDto);
-    }
-
-    @Test
     public void testThatFindAllWithPageableReturnsPageOfAuthors() {
         AuthorEntity authorEntity = TestDataUtil.createTestAuthor();
         AuthorDto authorDto = AuthorDto.builder().id(1L).name("H.P.").build();

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -111,7 +110,7 @@ public class RatingRepositoryTest {
     }
 
     @Test
-    public void testThatFindRecentRatingByUserAndBookReturnsRatingWithinWeek() {
+    public void testThatExistsByUserAndBookReturnsTrueWhenRatingExists() {
         UserEntity user = TestDataUtil.createTestUser();
         userRepository.save(user);
 
@@ -121,9 +120,20 @@ public class RatingRepositoryTest {
         RatingEntity rating = TestDataUtil.createTestRating(user, book);
         underTest.save(rating);
 
-        LocalDateTime weekAgo = LocalDateTime.now().minusDays(7);
-        Optional<RatingEntity> result = underTest.findRecentRatingByUserAndBook(user, book, weekAgo);
-        assertThat(result).isPresent();
+        boolean result = underTest.existsByUserAndBook(user, book);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void testThatExistsByUserAndBookReturnsFalseWhenNoRating() {
+        UserEntity user = TestDataUtil.createTestUser();
+        userRepository.save(user);
+
+        BookEntity book = TestDataUtil.createTestBook();
+        bookRepository.save(book);
+
+        boolean result = underTest.existsByUserAndBook(user, book);
+        assertThat(result).isFalse();
     }
 
     @Test

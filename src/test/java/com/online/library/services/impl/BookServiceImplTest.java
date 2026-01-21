@@ -56,20 +56,6 @@ public class BookServiceImplTest {
     }
 
     @Test
-    public void testThatFindAllReturnsListOfBooks() {
-        BookEntity bookEntity = TestDataUtil.createTestBook();
-        BookDto bookDto = BookDto.builder().id(1L).title("The Shadow over Innsmouth").build();
-
-        when(bookRepository.findAll()).thenReturn(List.of(bookEntity));
-        when(bookMapper.mapTo(bookEntity)).thenReturn(bookDto);
-
-        List<BookDto> result = underTest.findAll();
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo(bookDto);
-    }
-
-    @Test
     public void testThatFindAllWithPageableReturnsPageOfBooks() {
         BookEntity bookEntity = TestDataUtil.createTestBook();
         BookDto bookDto = BookDto.builder().id(1L).title("The Shadow over Innsmouth").build();

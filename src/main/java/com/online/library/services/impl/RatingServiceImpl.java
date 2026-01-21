@@ -18,11 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +31,6 @@ public class RatingServiceImpl implements RatingService {
     private final BookRepository bookRepository;
     private final Mapper<RatingEntity, RatingDto> ratingMapper;
 
-    private static final int RATING_COOLDOWN_DAYS = 7;
-
     @Override
     public RatingDto save(RatingDto ratingDto) {
         RatingEntity ratingEntity = ratingMapper.mapFrom(ratingDto);
@@ -43,16 +39,8 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public List<RatingDto> findAll() {
-        return StreamSupport.stream(ratingRepository.findAll().spliterator(), false)
-                .map(ratingMapper::mapTo)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public Page<RatingDto> findAll(Pageable pageable) {
-        Page<RatingEntity> foundRatings = ratingRepository.findAll(pageable);
-        return foundRatings.map(ratingMapper::mapTo);
+        return ratingRepository.findAll(pageable).map(ratingMapper::mapTo);
     }
 
     @Override
@@ -67,8 +55,6 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingDto partialUpdate(Long id, RatingDto ratingDto) {
-        ratingDto.setId(id);
-
         return ratingRepository.findById(id).map(existingRating -> {
             Optional.ofNullable(ratingDto.getRating()).ifPresent(existingRating::setRating);
             return ratingMapper.mapTo(ratingRepository.save(existingRating));
@@ -95,36 +81,21 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public boolean canUserRateBook(Long userId, Long bookId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        BookEntity book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
-
-        LocalDateTime weekAgo = LocalDateTime.now().minusDays(RATING_COOLDOWN_DAYS);
-        Optional<RatingEntity> recentRating = ratingRepository.findRecentRatingByUserAndBook(user, book, weekAgo);
-
-        return recentRating.isEmpty();
-    }
-
-    @Override
     @Transactional
-    public RatingDto addRating(Long userId, Long bookId, Integer rating) {
-        if (!canUserRateBook(userId, bookId)) {
-            throw new IllegalStateException("User can only rate a book once per week");
-        }
-
+    public RatingDto rateBook(Long userId, Long bookId, Integer rating) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         BookEntity book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
 
-        RatingEntity ratingEntity = RatingEntity.builder()
-                .user(user)
-                .book(book)
-                .rating(rating)
-                .build();
+        // Find existing rating or create new one
+        RatingEntity ratingEntity = ratingRepository.findByUserAndBook(user, book)
+                .orElse(RatingEntity.builder()
+                        .user(user)
+                        .book(book)
+                        .build());
 
+        ratingEntity.setRating(rating);
         RatingEntity savedRating = ratingRepository.save(ratingEntity);
 
         updateBookAverageRating(bookId);

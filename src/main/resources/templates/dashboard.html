@@ -1,67 +1,155 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: header('Panel użytkownika')}"></head>
-<body>
+  <head th:replace="~{fragments/layout :: header('Panel użytkownika')}"></head>
+  <body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
-
-<div class="container">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Informacje o profilu</h5>
-                </div>
-                <div class="card-body">
-                    <p><strong>Użytkownik:</strong> <span th:text="${user.username}"></span></p>
-                    <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
-                    <p><strong>Rola:</strong> <span th:text="${user.role}"></span></p>
-                    <p><strong>Konto od:</strong> <span th:text="${#temporals.format(user.createdAt, 'dd.MM.yyyy HH:mm')}"></span></p>
-                </div>
-            </div>
+    <div class="container">
+      <div class="row">
+        <!-- Success/Error Messages -->
+        <div class="col-12">
+          <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
         </div>
 
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Moje rezerwacje</h5>
-                </div>
-                <div class="card-body">
-                    <div th:if="${#lists.isEmpty(reservations)}" class="alert alert-info">
-                        Nie masz jeszcze żadnych rezerwacji.
-                    </div>
-                    
-                    <div th:if="${!#lists.isEmpty(reservations)}" class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Książka</th>
-                                    <th>Data rezerwacji</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="res : ${reservations}">
-                                    <td th:text="${res.book.title}">Tytuł</td>
-                                    <td th:text="${#temporals.format(res.reservedAt, 'dd.MM.yyyy HH:mm')}">Data</td>
-                                    <td>
-                                        <span class="badge" 
-                                              th:classappend="${res.status.name() == 'OCZEKUJĄCA' ? 'bg-warning' : 
-                                                              (res.status.name() == 'POTWIERDZONA' ? 'bg-info' : 
-                                                              (res.status.name() == 'WYPOŻYCZONA' ? 'bg-primary' : 'bg-success'))}"
-                                              th:text="${res.status}">Status</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <div class="col-md-12">
+          <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"> <i class="bi bi-bookmark-star me-2"></i>Moje rezerwacje </h5>
             </div>
+            <div class="card-body">
+              <div th:if="${#lists.isEmpty(reservations)}" class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>Nie masz jeszcze żadnych rezerwacji.
+                <a th:href="@{/}" class="alert-link">Przeglądaj książki</a> i zarezerwuj swoją pierwszą!
+              </div>
+
+              <div th:if="${!#lists.isEmpty(reservations)}" class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Książka</th>
+                      <th>Data rezerwacji</th>
+                      <th>Status</th>
+                      <th>Akcje</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="res : ${reservations}">
+                      <td>
+                        <a th:href="@{/books/{id}(id=${res.book.id})}" class="text-decoration-none">
+                          <strong th:text="${res.book.title}">Tytuł</strong>
+                        </a>
+                      </td>
+                      <td>
+                        <small th:text="${#temporals.format(res.reservedAt, 'dd.MM.yyyy HH:mm')}">Data</small>
+                        <br th:if="${res.confirmedAt}" />
+                        <small th:if="${res.confirmedAt}" class="text-muted">
+                          Potwierdzona:
+                          <span th:text="${#temporals.format(res.confirmedAt, 'dd.MM.yyyy HH:mm')}"></span>
+                        </small>
+                        <br th:if="${res.loanedAt}" />
+                        <small th:if="${res.loanedAt}" class="text-muted">
+                          Wypożyczona:
+                          <span th:text="${#temporals.format(res.loanedAt, 'dd.MM.yyyy HH:mm')}"></span>
+                        </small>
+                        <br th:if="${res.returnedAt}" />
+                        <small th:if="${res.returnedAt}" class="text-muted">
+                          Zwrócona:
+                          <span th:text="${#temporals.format(res.returnedAt, 'dd.MM.yyyy HH:mm')}"></span>
+                        </small>
+                      </td>
+                      <td>
+                        <span
+                          class="badge"
+                          th:classappend="${res.status.name() == 'OCZEKUJĄCA' ? 'bg-warning text-dark' :
+                                      (res.status.name() == 'POTWIERDZONA' ? 'bg-info' :
+                                      (res.status.name() == 'WYPOŻYCZONA' ? 'bg-primary' : 'bg-success'))}"
+                          th:text="${res.status}"
+                          >Status</span
+                        >
+                      </td>
+                      <td>
+                        <!-- Actions based on status -->
+                        <div class="btn-group btn-group-sm" role="group">
+                          <!-- OCZEKUJĄCA: Can cancel only (confirmation is admin-only) -->
+                          <th:block th:if="${res.status.name() == 'OCZEKUJĄCA'}">
+                            <span class="badge bg-light text-dark me-2">
+                              <i class="bi bi-hourglass-split"></i> Oczekuje na potwierdzenie
+                            </span>
+                            <form
+                              th:action="@{/dashboard/reservations/{id}/cancel(id=${res.id})}"
+                              method="post"
+                              class="d-inline ms-1">
+                              <button
+                                type="submit"
+                                class="btn btn-outline-danger btn-sm"
+                                title="Anuluj rezerwację"
+                                onclick="return confirm('Czy na pewno chcesz anulować tę rezerwację?');">
+                                <i class="bi bi-x-lg"></i> Anuluj
+                              </button>
+                            </form>
+                            <form
+                              th:action="@{/dashboard/reservations/{id}/confirm(id=${res.id})}"
+                              method="post"
+                              class="d-inline">
+                              <button type="submit" class="btn btn-warning btn-sm" title="Potwierdź rezerwację">
+                                <i class="bi bi-check-lg"></i> Potwierdź
+                              </button>
+                            </form>
+                          </th:block>
+
+                          <!-- POTWIERDZONA: Can cancel (waiting for library pickup) -->
+                          <th:block th:if="${res.status.name() == 'POTWIERDZONA'}">
+                            <span class="badge bg-light text-dark me-2">
+                              <i class="bi bi-clock"></i> Oczekuje na odbiór
+                            </span>
+                            <form
+                              th:action="@{/dashboard/reservations/{id}/cancel(id=${res.id})}"
+                              method="post"
+                              class="d-inline">
+                              <button
+                                type="submit"
+                                class="btn btn-outline-danger btn-sm"
+                                title="Anuluj rezerwację"
+                                onclick="return confirm('Czy na pewno chcesz anulować tę rezerwację?');">
+                                <i class="bi bi-x-lg"></i> Anuluj
+                              </button>
+                            </form>
+                          </th:block>
+
+                          <!-- WYPOŻYCZONA: No actions -->
+                          <th:block th:if="${res.status.name() == 'WYPOŻYCZONA'}">
+                            <span class="text-muted small">
+                              <i class="bi bi-arrow-return-left text-info"></i>
+                              Zwróć książkę
+                            </span>
+                          </th:block>
+
+                          <!-- ZWRÓCONA: No actions -->
+                          <th:block th:if="${res.status.name() == 'ZWRÓCONA'}">
+                            <span class="text-muted small">
+                              <i class="bi bi-check-circle text-success"></i>
+                              Zakończona
+                            </span>
+                          </th:block>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
-<footer th:replace="~{fragments/layout :: footer}"></footer>
-
-</body>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+  </body>
 </html>

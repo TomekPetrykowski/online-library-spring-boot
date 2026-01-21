@@ -62,20 +62,6 @@ public class CommentServiceImplTest {
     }
 
     @Test
-    public void testThatFindAllReturnsListOfComments() {
-        CommentEntity commentEntity = TestDataUtil.createTestComment(null, null);
-        CommentDto commentDto = CommentDto.builder().id(1L).content("Great book!").build();
-
-        when(commentRepository.findAll()).thenReturn(List.of(commentEntity));
-        when(commentMapper.mapTo(commentEntity)).thenReturn(commentDto);
-
-        List<CommentDto> result = underTest.findAll();
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo(commentDto);
-    }
-
-    @Test
     public void testThatFindAllWithPageableReturnsPageOfComments() {
         CommentEntity commentEntity = TestDataUtil.createTestComment(null, null);
         CommentDto commentDto = CommentDto.builder().id(1L).content("Great book!").build();
@@ -163,21 +149,6 @@ public class CommentServiceImplTest {
         underTest.delete(commentId);
 
         verify(commentRepository, times(1)).deleteById(commentId);
-    }
-
-    @Test
-    public void testThatFindByBookIdReturnsListOfComments() {
-        Long bookId = 1L;
-        CommentEntity commentEntity = TestDataUtil.createTestComment(null, null);
-        CommentDto commentDto = CommentDto.builder().id(1L).content("Great book!").build();
-
-        when(commentRepository.findByBookIdOrderByCreatedAtDesc(bookId)).thenReturn(List.of(commentEntity));
-        when(commentMapper.mapTo(commentEntity)).thenReturn(commentDto);
-
-        List<CommentDto> result = underTest.findByBookId(bookId);
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo(commentDto);
     }
 
     @Test

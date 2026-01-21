@@ -1,0 +1,102 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments/layout :: header('Zarządzanie książkami')}"></head>
+  <body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-book"></i> Zarządzanie książkami</h2>
+        <div>
+          <a th:href="@{/admin/books/new}" class="btn btn-success"> <i class="bi bi-plus-lg"></i> Dodaj książkę </a>
+          <a th:href="@{/admin}" class="btn btn-secondary"> <i class="bi bi-arrow-left"></i> Powrót </a>
+        </div>
+      </div>
+
+      <!-- Success/Error Messages -->
+      <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div th:if="${books.isEmpty()}" class="alert alert-info"> Brak książek w systemie. </div>
+
+          <div th:if="${!books.isEmpty()}" class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>ID</th>
+                  <th>Tytuł</th>
+                  <th>Autorzy</th>
+                  <th>ISBN</th>
+                  <th>Rok</th>
+                  <th>Kopie</th>
+                  <th>Akcje</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="book : ${books.content}">
+                  <td th:text="${book.id}"></td>
+                  <td>
+                    <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}"></a>
+                  </td>
+                  <td>
+                    <span th:each="author, stat : ${book.authors}">
+                      <span th:text="${author.name + ' ' + author.lastName}"></span
+                      ><span th:if="${!stat.last}">, </span>
+                    </span>
+                  </td>
+                  <td th:text="${book.isbn}"></td>
+                  <td th:text="${book.publishYear}"></td>
+                  <td th:text="${book.copiesAvailable}"></td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <a th:href="@{/admin/books/{id}/edit(id=${book.id})}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      <form
+                        th:action="@{/admin/books/{id}/delete(id=${book.id})}"
+                        method="post"
+                        class="d-inline"
+                        onsubmit="return confirm('Czy na pewno chcesz usunąć tę książkę?');">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <nav th:if="${books.totalPages > 1}">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" th:classappend="${books.first ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/admin/books(page=${books.number - 1})}">Poprzednia</a>
+              </li>
+              <li
+                class="page-item"
+                th:each="i : ${#numbers.sequence(0, books.totalPages - 1)}"
+                th:classappend="${i == books.number ? 'active' : ''}">
+                <a class="page-link" th:href="@{/admin/books(page=${i})}" th:text="${i + 1}"></a>
+              </li>
+              <li class="page-item" th:classappend="${books.last ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/admin/books(page=${books.number + 1})}">Następna</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+  </body>
+</html>

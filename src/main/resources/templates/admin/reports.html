@@ -1,0 +1,118 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments/layout :: header('Raporty - Panel Administratora')}"></head>
+  <body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-graph-up"></i> Raporty i Statystyki</h2>
+        <a th:href="@{/admin}" class="btn btn-outline-secondary"> <i class="bi bi-arrow-left"></i> Powrót do panelu </a>
+      </div>
+
+      <div class="row">
+        <!-- Most Popular Books -->
+        <div class="col-lg-4 mb-4">
+          <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0"><i class="bi bi-star-fill"></i> Najpopularniejsze książki</h5>
+            </div>
+            <div class="card-body p-0">
+              <table class="table table-striped table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Tytuł</th>
+                    <th>Ocena</th>
+                    <th>Rez.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="book, iter : ${popularBooks}">
+                    <td th:text="${iter.count}">1</td>
+                    <td>
+                      <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}">Tytuł</a>
+                    </td>
+                    <td>
+                      <span class="badge bg-warning text-dark" th:if="${book.averageRating != null}">
+                        <i class="bi bi-star-fill"></i>
+                        <span th:text="${#numbers.formatDecimal(book.averageRating, 1, 1)}">4.5</span>
+                      </span>
+                      <span class="text-muted" th:if="${book.averageRating == null}">-</span>
+                    </td>
+                    <td th:text="${book.reservationCount}">0</td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(popularBooks)}">
+                    <td colspan="4" class="text-center text-muted">Brak danych</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Most Read Authors -->
+        <div class="col-lg-4 mb-4">
+          <div class="card h-100">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0"><i class="bi bi-person-fill"></i> Najczęściej czytani autorzy</h5>
+            </div>
+            <div class="card-body p-0">
+              <table class="table table-striped table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Autor</th>
+                    <th>Wypożyczenia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="author, iter : ${readAuthors}">
+                    <td th:text="${iter.count}">1</td>
+                    <td th:text="${author.name + ' ' + author.lastName}">Jan Kowalski</td>
+                    <td th:text="${author.loanCount}">0</td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(readAuthors)}">
+                    <td colspan="3" class="text-center text-muted">Brak danych</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Most Active Users -->
+        <div class="col-lg-4 mb-4">
+          <div class="card h-100">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0"><i class="bi bi-people-fill"></i> Najbardziej aktywni użytkownicy</h5>
+            </div>
+            <div class="card-body p-0">
+              <table class="table table-striped table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Użytkownik</th>
+                    <th>Rezerwacje</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="user, iter : ${activeUsers}">
+                    <td th:text="${iter.count}">1</td>
+                    <td th:text="${user.username}">user123</td>
+                    <td th:text="${user.reservationCount}">0</td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(activeUsers)}">
+                    <td colspan="3" class="text-center text-muted">Brak danych</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+  </body>
+</html>

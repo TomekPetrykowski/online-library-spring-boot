@@ -1,0 +1,62 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments/layout :: header('Zarządzanie gatunkami')}"></head>
+  <body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-tags"></i> Zarządzanie gatunkami</h2>
+        <div>
+          <a th:href="@{/admin/genres/new}" class="btn btn-success"> <i class="bi bi-plus-lg"></i> Dodaj gatunek </a>
+          <a th:href="@{/admin}" class="btn btn-secondary"> <i class="bi bi-arrow-left"></i> Powrót </a>
+        </div>
+      </div>
+
+      <!-- Success/Error Messages -->
+      <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div th:if="${#lists.isEmpty(genres)}" class="alert alert-info"> Brak gatunków w systemie. </div>
+
+          <div th:if="${!#lists.isEmpty(genres)}" class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>ID</th>
+                  <th>Nazwa gatunku</th>
+                  <th>Akcje</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="genre : ${genres}">
+                  <td th:text="${genre.id}"></td>
+                  <td th:text="${genre.name}"></td>
+                  <td>
+                    <form
+                      th:action="@{/admin/genres/{id}/delete(id=${genre.id})}"
+                      method="post"
+                      class="d-inline"
+                      onsubmit="return confirm('Czy na pewno chcesz usunąć ten gatunek?');">
+                      <button type="submit" class="btn btn-danger btn-sm"> <i class="bi bi-trash"></i> Usuń </button>
+                    </form>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+  </body>
+</html>
