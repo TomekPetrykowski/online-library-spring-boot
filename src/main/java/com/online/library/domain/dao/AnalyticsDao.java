@@ -80,19 +80,19 @@ public class AnalyticsDao {
         return jdbcTemplate.query(sql, USER_STAT_ROW_MAPPER, limit);
     }
 
-    public int updateBookAverageRating(Long bookId, java.math.BigDecimal averageRating) {
-        log.debug("Updating average rating for book id={} to {}", bookId, averageRating);
-        String sql = "UPDATE books SET average_rating = ? WHERE id = ?";
-        return jdbcTemplate.update(sql, averageRating, bookId);
-    }
-
-    public int deleteOldReturnedReservations(int daysOld) {
-        log.debug("Deleting returned reservations older than {} days", daysOld);
-        String sql = """
-                DELETE FROM reservations
-                WHERE status = 'ZWRÓCONA'
-                AND returned_at < CURRENT_DATE - INTERVAL '%d days'
-                """.formatted(daysOld);
-        return jdbcTemplate.update(sql);
-    }
+//    public int updateBookAverageRating(Long bookId, java.math.BigDecimal averageRating) {
+//        log.debug("Updating average rating for book id={} to {}", bookId, averageRating);
+//        String sql = "UPDATE books SET average_rating = ? WHERE id = ?";
+//        return jdbcTemplate.update(sql, averageRating, bookId);
+//    }
+//
+//    public int deleteOldReturnedReservations(int daysOld) {
+//        log.debug("Deleting returned reservations older than {} days", daysOld);
+//        String sql = """
+//                DELETE FROM reservations
+//                WHERE status = 'ZWRÓCONA'
+//                AND returned_at < CURRENT_DATE - INTERVAL '%d days'
+//                """.formatted(daysOld);
+//        return jdbcTemplate.update(sql);
+//    }
 }
