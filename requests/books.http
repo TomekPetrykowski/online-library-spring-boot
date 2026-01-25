@@ -1,6 +1,7 @@
 ### Create Book
 POST {{base_url}}/books
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "title": "Pan Tadeusz",
@@ -13,15 +14,16 @@ Content-Type: application/json
 
 > {% client.global.set("book_id", response.body.id); %}
 
-### List Books
+### List Books (public - no auth required)
 GET {{base_url}}/books
 
-### Get Book
+### Get Book (public - no auth required)
 GET {{base_url}}/books/{{book_id}}
 
 ### Full Update Book
 PUT {{base_url}}/books/{{book_id}}
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "title": "Pan Tadeusz - Special Edition",
@@ -35,6 +37,7 @@ Content-Type: application/json
 ### Partial Update Book
 PATCH {{base_url}}/books/{{book_id}}
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "copiesAvailable": 15
@@ -42,10 +45,11 @@ Content-Type: application/json
 
 ### Delete Book
 DELETE {{base_url}}/books/{{book_id}}
+Authorization: {{auth}}
 
-### Get 5 the most popular books
-GET {{base_url}}/api/v1/books/popular
+### Get 5 the most popular books (public)
+GET {{base_url}}/books/popular
 
-### Search for books
-GET {{base_url}}/api/v1/books/search?
+### Search for books (public)
+GET {{base_url}}/books/search?
     q={{$random.alphanumeric(8)}}

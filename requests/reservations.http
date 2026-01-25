@@ -1,6 +1,7 @@
 ### Create Reservation
 POST {{base_url}}/reservations
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "user": { "id": 1 },
@@ -12,13 +13,16 @@ Content-Type: application/json
 
 ### List Reservations
 GET {{base_url}}/reservations
+Authorization: {{auth}}
 
 ### Get Reservation
 GET {{base_url}}/reservations/{{reservation_id}}
+Authorization: {{auth}}
 
 ### Partial Update Reservation
 PATCH {{base_url}}/reservations/{{reservation_id}}
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "status": "POTWIERDZONA"
@@ -26,3 +30,4 @@ Content-Type: application/json
 
 ### Delete Reservation
 DELETE {{base_url}}/reservations/{{reservation_id}}
+Authorization: {{auth}}

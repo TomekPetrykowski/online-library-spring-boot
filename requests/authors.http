@@ -1,6 +1,7 @@
 ### Create Author
 POST {{base_url}}/authors
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "name": "Adam",
@@ -10,18 +11,19 @@ Content-Type: application/json
 
 > {% client.global.set("author_id", response.body.id); %}
 
-### List Authors
+### List Authors (public)
 GET {{base_url}}/authors
 
-### Get Author
+### Get Author (public)
 GET {{base_url}}/authors/{{author_id}}
 
-### Get Author Manual
+### Get Author Manual (public)
 GET {{base_url}}/authors/1
 
 ### Full Update Author
 PUT {{base_url}}/authors/{{author_id}}
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "name": "Adam Bernard",
@@ -32,6 +34,7 @@ Content-Type: application/json
 ### Partial Update Author
 PATCH {{base_url}}/authors/{{author_id}}
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "bio": "Partially updated bio."
@@ -39,3 +42,4 @@ Content-Type: application/json
 
 ### Delete Author
 DELETE {{base_url}}/authors/{{author_id}}
+Authorization: {{auth}}

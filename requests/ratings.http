@@ -1,6 +1,7 @@
 ### Create Rating
 POST {{base_url}}/ratings
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "user": { "id": 1 },
@@ -12,9 +13,12 @@ Content-Type: application/json
 
 ### List Ratings
 GET {{base_url}}/ratings
+Authorization: {{auth}}
 
 ### Get Rating
 GET {{base_url}}/ratings/{{rating_id}}
+Authorization: {{auth}}
 
 ### Delete Rating
 DELETE {{base_url}}/ratings/{{rating_id}}
+Authorization: {{auth}}

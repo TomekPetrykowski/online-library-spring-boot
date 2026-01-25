@@ -1,6 +1,7 @@
 ### Create Genre
 POST {{base_url}}/genres
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "name": "Epic Poetry"
@@ -8,11 +9,12 @@ Content-Type: application/json
 
 > {% client.global.set("genre_id", response.body.id); %}
 
-### List Genres
+### List Genres (public)
 GET {{base_url}}/genres
 
-### Get Genre
+### Get Genre (public)
 GET {{base_url}}/genres/{{genre_id}}
 
 ### Delete Genre
 DELETE {{base_url}}/genres/{{genre_id}}
+Authorization: {{auth}}

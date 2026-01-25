@@ -1,6 +1,7 @@
 ### Create Comment
 POST {{base_url}}/comments
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "user": { "id": 1 },
@@ -12,9 +13,12 @@ Content-Type: application/json
 
 ### List Comments
 GET {{base_url}}/comments
+Authorization: {{auth}}
 
 ### Get Comment
 GET {{base_url}}/comments/{{comment_id}}
+Authorization: {{auth}}
 
 ### Delete Comment
 DELETE {{base_url}}/comments/{{comment_id}}
+Authorization: {{auth}}

@@ -1,6 +1,7 @@
 ### Create User
 POST {{base_url}}/users
 Content-Type: application/json
+Authorization: {{auth}}
 
 {
   "username": "jdoe",
@@ -14,9 +15,12 @@ Content-Type: application/json
 
 ### List Users
 GET {{base_url}}/users
+Authorization: {{auth}}
 
 ### Get User
 GET {{base_url}}/users/{{user_id}}
+Authorization: {{auth}}
 
 ### Delete User
 DELETE {{base_url}}/users/{{user_id}}
+Authorization: {{auth}}
