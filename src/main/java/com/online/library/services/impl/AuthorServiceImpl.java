@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ public class AuthorServiceImpl implements AuthorService {
     private final Mapper<AuthorEntity, AuthorDto> authorMapper;
 
     @Override
+    @Transactional
     public AuthorDto save(AuthorDto authorDto) {
         AuthorEntity authorEntity = authorMapper.mapFrom(authorDto);
         AuthorEntity savedAuthorEntity = authorRepository.save(authorEntity);
@@ -28,22 +30,26 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<AuthorDto> findAll(Pageable pageable) {
         Page<AuthorEntity> foundAuthors = authorRepository.findAll(pageable);
         return foundAuthors.map(authorMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<AuthorDto> findById(Long id) {
         return authorRepository.findById(id).map(authorMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isExists(Long id) {
         return authorRepository.existsById(id);
     }
 
     @Override
+    @Transactional
     public AuthorDto partialUpdate(Long id, AuthorDto authorDto) {
         authorDto.setId(id);
 
@@ -56,6 +62,7 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         authorRepository.deleteById(id);
     }

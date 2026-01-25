@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +30,7 @@ public class CommentServiceImpl implements CommentService {
     private final Mapper<CommentEntity, CommentDto> commentMapper;
 
     @Override
+    @Transactional
     public CommentDto save(CommentDto commentDto) {
         CommentEntity commentEntity = commentMapper.mapFrom(commentDto);
         CommentEntity savedCommentEntity = commentRepository.save(commentEntity);
@@ -36,22 +38,26 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<CommentDto> findAll(Pageable pageable) {
         Page<CommentEntity> foundComments = commentRepository.findAll(pageable);
         return foundComments.map(commentMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<CommentDto> findById(Long id) {
         return commentRepository.findById(id).map(commentMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isExists(Long id) {
         return commentRepository.existsById(id);
     }
 
     @Override
+    @Transactional
     public CommentDto partialUpdate(Long id, CommentDto commentDto) {
         commentDto.setId(id);
 
@@ -62,17 +68,20 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         commentRepository.deleteById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<CommentDto> findByBookId(Long bookId, Pageable pageable) {
         return commentRepository.findByBookIdOrderByCreatedAtDesc(bookId, pageable)
                 .map(commentMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentDto> findByUserId(Long userId) {
         return commentRepository.findByUserId(userId).stream()
                 .map(commentMapper::mapTo)

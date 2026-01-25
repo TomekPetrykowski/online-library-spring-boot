@@ -32,6 +32,7 @@ public class RatingServiceImpl implements RatingService {
     private final Mapper<RatingEntity, RatingDto> ratingMapper;
 
     @Override
+    @Transactional
     public RatingDto save(RatingDto ratingDto) {
         RatingEntity ratingEntity = ratingMapper.mapFrom(ratingDto);
         RatingEntity savedRatingEntity = ratingRepository.save(ratingEntity);
@@ -39,21 +40,25 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<RatingDto> findAll(Pageable pageable) {
         return ratingRepository.findAll(pageable).map(ratingMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<RatingDto> findById(Long id) {
         return ratingRepository.findById(id).map(ratingMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isExists(Long id) {
         return ratingRepository.existsById(id);
     }
 
     @Override
+    @Transactional
     public RatingDto partialUpdate(Long id, RatingDto ratingDto) {
         return ratingRepository.findById(id).map(existingRating -> {
             Optional.ofNullable(ratingDto.getRating()).ifPresent(existingRating::setRating);
@@ -62,11 +67,13 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         ratingRepository.deleteById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RatingDto> findByBookId(Long bookId) {
         return ratingRepository.findByBookId(bookId).stream()
                 .map(ratingMapper::mapTo)
@@ -74,6 +81,7 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RatingDto> findByUserId(Long userId) {
         return ratingRepository.findByUserId(userId).stream()
                 .map(ratingMapper::mapTo)
@@ -104,6 +112,7 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BigDecimal calculateAverageRating(Long bookId) {
         return ratingRepository.calculateAverageRatingByBookId(bookId)
                 .map(avg -> avg.setScale(2, RoundingMode.HALF_UP))
@@ -111,11 +120,13 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Long countRatingsForBook(Long bookId) {
         return ratingRepository.countRatingsByBookId(bookId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Integer getUserRatingForBook(Long userId, Long bookId) {
         UserEntity user = userRepository.findById(userId).orElse(null);
         BookEntity book = bookRepository.findById(bookId).orElse(null);

@@ -34,27 +34,32 @@ public class ReservationServiceImpl implements ReservationService {
     private final Mapper<ReservationEntity, ReservationDto> reservationMapper;
 
     @Override
+    @Transactional
     public ReservationDto save(ReservationDto reservationDto) {
         ReservationEntity entity = reservationMapper.mapFrom(reservationDto);
         return reservationMapper.mapTo(reservationRepository.save(entity));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ReservationDto> findAll(Pageable pageable) {
         return reservationRepository.findAll(pageable).map(reservationMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<ReservationDto> findById(Long id) {
         return reservationRepository.findById(id).map(reservationMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isExists(Long id) {
         return reservationRepository.existsById(id);
     }
 
     @Override
+    @Transactional
     public ReservationDto partialUpdate(Long id, ReservationDto dto) {
         return reservationRepository.findById(id).map(existing -> {
             Optional.ofNullable(dto.getStatus()).ifPresent(existing::setStatus);
@@ -66,11 +71,13 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         reservationRepository.deleteById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ReservationDto> findByUserId(Long userId) {
         return reservationRepository.findByUserId(userId).stream()
                 .map(reservationMapper::mapTo)
@@ -78,6 +85,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ReservationDto> findByUserIdOrderByDate(Long userId) {
         return reservationRepository.findByUserIdOrderByReservedAtDesc(userId).stream()
                 .map(reservationMapper::mapTo)
@@ -85,6 +93,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ReservationDto> findByBookId(Long bookId) {
         return reservationRepository.findByBookId(bookId).stream()
                 .map(reservationMapper::mapTo)
@@ -92,6 +101,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ReservationDto> findByStatus(ReservationStatus status) {
         return reservationRepository.findByStatus(status).stream()
                 .map(reservationMapper::mapTo)
@@ -175,11 +185,13 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean canUserReserveBook(Long userId, Long bookId) {
         return getActiveReservation(userId, bookId).isEmpty() && hasAvailableCopies(bookId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean hasAvailableCopies(Long bookId) {
         BookEntity book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
@@ -194,6 +206,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<ReservationDto> getActiveReservation(Long userId, Long bookId) {
         return reservationRepository.findByUserIdAndBookIdAndStatusIsActive(userId, bookId)
                 .map(reservationMapper::mapTo);

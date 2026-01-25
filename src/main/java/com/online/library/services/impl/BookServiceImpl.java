@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -23,6 +24,7 @@ public class BookServiceImpl implements BookService {
     private final Mapper<BookEntity, BookDto> bookMapper;
 
     @Override
+    @Transactional
     public BookDto save(BookDto bookDto) {
         log.info("Zapisywanie książki: {}", bookDto.getTitle());
         BookEntity bookEntity = bookMapper.mapFrom(bookDto);
@@ -32,23 +34,27 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<BookDto> findAll(Pageable pageable) {
         Page<BookEntity> foundBooks = bookRepository.findAll(pageable);
         return foundBooks.map(bookMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<BookDto> findById(Long id) {
         log.debug("Znajdowanie książki o id: {}", id);
         return bookRepository.findById(id).map(bookMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isExists(Long id) {
         return bookRepository.existsById(id);
     }
 
     @Override
+    @Transactional
     public BookDto partialUpdate(Long id, BookDto bookDto) {
         bookDto.setId(id);
 
@@ -66,18 +72,21 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<BookDto> searchBooks(String searchTerm, Pageable pageable) {
         Page<BookEntity> books = bookRepository.searchBooks(searchTerm, pageable);
         return books.map(bookMapper::mapTo);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<BookDto> getPopularBooks(Pageable pageable) {
         Page<BookEntity> books = bookRepository.findAllByOrderByAverageRatingDesc(pageable);
         return books.map(bookMapper::mapTo);
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         log.info("Usuwanie książki o id: {}", id);
         bookRepository.deleteById(id);
