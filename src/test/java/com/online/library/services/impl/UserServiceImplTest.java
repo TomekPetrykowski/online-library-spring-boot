@@ -211,8 +211,8 @@ public class UserServiceImplTest {
         Long userId = 1L;
         UserEntity existingUser = TestDataUtil.createTestUser();
         existingUser.setId(userId);
-        String newPassword = "newPassword123";
-        String encodedPassword = "encodedNewPassword123";
+        String newPassword = "newPassword12345";
+        String encodedPassword = "encodedNewPassword12345";
 
         UserRequestDto updateDto = UserRequestDto.builder()
                 .password(newPassword)
@@ -232,6 +232,27 @@ public class UserServiceImplTest {
         verify(passwordEncoder).encode(newPassword);
         assertThat(existingUser.getPassword()).isEqualTo(encodedPassword);
         verify(userRepository).save(existingUser);
+    }
+
+    @Test
+    public void testThatPartialUpdateThrowsExceptionWhenPasswordTooShort() {
+        Long userId = 1L;
+        UserEntity existingUser = TestDataUtil.createTestUser();
+        existingUser.setId(userId);
+        String shortPassword = "short"; // Less than 12 characters
+
+        UserRequestDto updateDto = UserRequestDto.builder()
+                .password(shortPassword)
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+
+        assertThatThrownBy(() -> underTest.partialUpdate(userId, updateDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Password must be between 12 and 256 characters");
+
+        verify(passwordEncoder, never()).encode(any());
+        verify(userRepository, never()).save(any());
     }
 
     @Test
