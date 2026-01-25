@@ -42,8 +42,7 @@ class ExportServiceImplTest {
                         .title("Test Book 2")
                         .averageRating(BigDecimal.valueOf(3.8))
                         .reservationCount(5L)
-                        .build()
-        );
+                        .build());
 
         // When
         byte[] result = underTest.exportPopularBooksToCsv(books);
@@ -51,9 +50,12 @@ class ExportServiceImplTest {
 
         // Then
         assertThat(csvContent).startsWith(BOM);
-        assertThat(csvContent).contains("ID" + CSV_SEPARATOR + "Tytuł" + CSV_SEPARATOR + "Średnia ocena" + CSV_SEPARATOR + "Liczba rezerwacji");
-        assertThat(csvContent).contains("1" + CSV_SEPARATOR + "Test Book 1" + CSV_SEPARATOR + "4.5" + CSV_SEPARATOR + "10");
-        assertThat(csvContent).contains("2" + CSV_SEPARATOR + "Test Book 2" + CSV_SEPARATOR + "3.8" + CSV_SEPARATOR + "5");
+        assertThat(csvContent).contains(
+                "ID" + CSV_SEPARATOR + "Tytuł" + CSV_SEPARATOR + "Średnia ocena" + CSV_SEPARATOR + "Liczba rezerwacji");
+        assertThat(csvContent)
+                .contains("1" + CSV_SEPARATOR + "Test Book 1" + CSV_SEPARATOR + "4.5" + CSV_SEPARATOR + "10");
+        assertThat(csvContent)
+                .contains("2" + CSV_SEPARATOR + "Test Book 2" + CSV_SEPARATOR + "3.8" + CSV_SEPARATOR + "5");
     }
 
     @Test
@@ -67,7 +69,8 @@ class ExportServiceImplTest {
 
         // Then
         assertThat(csvContent).startsWith(BOM);
-        assertThat(csvContent).contains("ID" + CSV_SEPARATOR + "Tytuł" + CSV_SEPARATOR + "Średnia ocena" + CSV_SEPARATOR + "Liczba rezerwacji");
+        assertThat(csvContent).contains(
+                "ID" + CSV_SEPARATOR + "Tytuł" + CSV_SEPARATOR + "Średnia ocena" + CSV_SEPARATOR + "Liczba rezerwacji");
         // Should only contain header, no data rows
         String[] lines = csvContent.split("\n");
         assertThat(lines).hasSize(1);
@@ -82,15 +85,15 @@ class ExportServiceImplTest {
                         .title("Unrated Book")
                         .averageRating(null)
                         .reservationCount(3L)
-                        .build()
-        );
+                        .build());
 
         // When
         byte[] result = underTest.exportPopularBooksToCsv(books);
         String csvContent = new String(result, StandardCharsets.UTF_8);
 
         // Then
-        assertThat(csvContent).contains("1" + CSV_SEPARATOR + "Unrated Book" + CSV_SEPARATOR + "N/A" + CSV_SEPARATOR + "3");
+        assertThat(csvContent)
+                .contains("1" + CSV_SEPARATOR + "Unrated Book" + CSV_SEPARATOR + "N/A" + CSV_SEPARATOR + "3");
     }
 
     @Test
@@ -102,14 +105,14 @@ class ExportServiceImplTest {
                         .title("Book; with \"special\" chars\nand newlines")
                         .averageRating(BigDecimal.valueOf(4.0))
                         .reservationCount(7L)
-                        .build()
-        );
+                        .build());
 
         // When
         byte[] result = underTest.exportPopularBooksToCsv(books);
         String csvContent = new String(result, StandardCharsets.UTF_8);
 
-        // Then - special characters should be properly escaped with quotes and double-quotes
+        // Then - special characters should be properly escaped with quotes and
+        // double-quotes
         assertThat(csvContent).contains("\"Book; with \"\"special\"\" chars");
     }
 
@@ -130,8 +133,7 @@ class ExportServiceImplTest {
                         .name("Jane")
                         .lastName("Smith")
                         .loanCount(10L)
-                        .build()
-        );
+                        .build());
 
         // When
         byte[] result = underTest.exportReadAuthorsToCsv(authors);
@@ -139,7 +141,8 @@ class ExportServiceImplTest {
 
         // Then
         assertThat(csvContent).startsWith(BOM);
-        assertThat(csvContent).contains("ID" + CSV_SEPARATOR + "Imię" + CSV_SEPARATOR + "Nazwisko" + CSV_SEPARATOR + "Liczba wypożyczeń");
+        assertThat(csvContent).contains(
+                "ID" + CSV_SEPARATOR + "Imię" + CSV_SEPARATOR + "Nazwisko" + CSV_SEPARATOR + "Liczba wypożyczeń");
         assertThat(csvContent).contains("1" + CSV_SEPARATOR + "John" + CSV_SEPARATOR + "Doe" + CSV_SEPARATOR + "15");
         assertThat(csvContent).contains("2" + CSV_SEPARATOR + "Jane" + CSV_SEPARATOR + "Smith" + CSV_SEPARATOR + "10");
     }
@@ -155,7 +158,8 @@ class ExportServiceImplTest {
 
         // Then
         assertThat(csvContent).startsWith(BOM);
-        assertThat(csvContent).contains("ID" + CSV_SEPARATOR + "Imię" + CSV_SEPARATOR + "Nazwisko" + CSV_SEPARATOR + "Liczba wypożyczeń");
+        assertThat(csvContent).contains(
+                "ID" + CSV_SEPARATOR + "Imię" + CSV_SEPARATOR + "Nazwisko" + CSV_SEPARATOR + "Liczba wypożyczeń");
         String[] lines = csvContent.split("\n");
         assertThat(lines).hasSize(1);
     }
@@ -169,8 +173,7 @@ class ExportServiceImplTest {
                         .name("Jean-Pierre")
                         .lastName("O'Brien; Jr.")
                         .loanCount(8L)
-                        .build()
-        );
+                        .build());
 
         // When
         byte[] result = underTest.exportReadAuthorsToCsv(authors);
@@ -198,8 +201,7 @@ class ExportServiceImplTest {
                         .username("activeuser2")
                         .email("active2@example.com")
                         .reservationCount(15L)
-                        .build()
-        );
+                        .build());
 
         // When
         byte[] result = underTest.exportActiveUsersToCsv(users);
@@ -207,9 +209,12 @@ class ExportServiceImplTest {
 
         // Then
         assertThat(csvContent).startsWith(BOM);
-        assertThat(csvContent).contains("ID" + CSV_SEPARATOR + "Nazwa użytkownika" + CSV_SEPARATOR + "Email" + CSV_SEPARATOR + "Liczba rezerwacji");
-        assertThat(csvContent).contains("1" + CSV_SEPARATOR + "activeuser1" + CSV_SEPARATOR + "active1@example.com" + CSV_SEPARATOR + "20");
-        assertThat(csvContent).contains("2" + CSV_SEPARATOR + "activeuser2" + CSV_SEPARATOR + "active2@example.com" + CSV_SEPARATOR + "15");
+        assertThat(csvContent).contains("ID" + CSV_SEPARATOR + "Nazwa użytkownika" + CSV_SEPARATOR + "Email"
+                + CSV_SEPARATOR + "Liczba rezerwacji");
+        assertThat(csvContent).contains(
+                "1" + CSV_SEPARATOR + "activeuser1" + CSV_SEPARATOR + "active1@example.com" + CSV_SEPARATOR + "20");
+        assertThat(csvContent).contains(
+                "2" + CSV_SEPARATOR + "activeuser2" + CSV_SEPARATOR + "active2@example.com" + CSV_SEPARATOR + "15");
     }
 
     @Test
@@ -223,7 +228,8 @@ class ExportServiceImplTest {
 
         // Then
         assertThat(csvContent).startsWith(BOM);
-        assertThat(csvContent).contains("ID" + CSV_SEPARATOR + "Nazwa użytkownika" + CSV_SEPARATOR + "Email" + CSV_SEPARATOR + "Liczba rezerwacji");
+        assertThat(csvContent).contains("ID" + CSV_SEPARATOR + "Nazwa użytkownika" + CSV_SEPARATOR + "Email"
+                + CSV_SEPARATOR + "Liczba rezerwacji");
         String[] lines = csvContent.split("\n");
         assertThat(lines).hasSize(1);
     }
@@ -237,8 +243,7 @@ class ExportServiceImplTest {
                         .username("user;with\"special")
                         .email("special@example.com")
                         .reservationCount(5L)
-                        .build()
-        );
+                        .build());
 
         // When
         byte[] result = underTest.exportActiveUsersToCsv(users);
@@ -259,8 +264,7 @@ class ExportServiceImplTest {
                         .name(null)
                         .lastName("Doe")
                         .loanCount(5L)
-                        .build()
-        );
+                        .build());
 
         // When
         byte[] result = underTest.exportReadAuthorsToCsv(authors);
@@ -279,8 +283,7 @@ class ExportServiceImplTest {
                         .title("Book with\rcarriage return")
                         .averageRating(BigDecimal.valueOf(4.0))
                         .reservationCount(3L)
-                        .build()
-        );
+                        .build());
 
         // When
         byte[] result = underTest.exportPopularBooksToCsv(books);
@@ -299,8 +302,7 @@ class ExportServiceImplTest {
                         .title("\"Quoted Title\"")
                         .averageRating(BigDecimal.valueOf(4.0))
                         .reservationCount(3L)
-                        .build()
-        );
+                        .build());
 
         // When
         byte[] result = underTest.exportPopularBooksToCsv(books);
@@ -319,8 +321,7 @@ class ExportServiceImplTest {
                         .title("Książka z polskimi znakami: ąęćżźńłóś")
                         .averageRating(BigDecimal.valueOf(5.0))
                         .reservationCount(100L)
-                        .build()
-        );
+                        .build());
 
         // When
         byte[] result = underTest.exportPopularBooksToCsv(books);
