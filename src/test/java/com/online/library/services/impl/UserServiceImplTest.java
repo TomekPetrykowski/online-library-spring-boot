@@ -172,4 +172,125 @@ public class UserServiceImplTest {
 
         verify(userRepository, times(1)).deleteById(userId);
     }
+
+    @Test
+    public void testThatFindByUsernameReturnsUserWhenExists() {
+        String username = "testuser";
+        UserEntity userEntity = TestDataUtil.createTestUser();
+        userEntity.setId(1L);
+        userEntity.setUsername(username);
+        UserResponseDto userResponseDto = UserResponseDto.builder()
+                .id(1L)
+                .username(username)
+                .build();
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(userEntity));
+        when(userMapper.mapToResponse(userEntity)).thenReturn(userResponseDto);
+
+        Optional<UserResponseDto> result = underTest.findByUsername(username);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getUsername()).isEqualTo(username);
+        verify(userRepository).findByUsername(username);
+    }
+
+    @Test
+    public void testThatFindByUsernameReturnsEmptyWhenNotExists() {
+        String username = "nonexistent";
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        Optional<UserResponseDto> result = underTest.findByUsername(username);
+
+        assertThat(result).isEmpty();
+        verify(userRepository).findByUsername(username);
+    }
+
+    @Test
+    public void testThatPartialUpdateEncodesPasswordWhenProvided() {
+        Long userId = 1L;
+        UserEntity existingUser = TestDataUtil.createTestUser();
+        existingUser.setId(userId);
+        String newPassword = "newPassword123";
+        String encodedPassword = "encodedNewPassword123";
+
+        UserRequestDto updateDto = UserRequestDto.builder()
+                .password(newPassword)
+                .build();
+        UserResponseDto updatedDto = UserResponseDto.builder()
+                .id(userId)
+                .username(existingUser.getUsername())
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(existingUser);
+        when(userMapper.mapToResponse(any(UserEntity.class))).thenReturn(updatedDto);
+
+        underTest.partialUpdate(userId, updateDto);
+
+        verify(passwordEncoder).encode(newPassword);
+        assertThat(existingUser.getPassword()).isEqualTo(encodedPassword);
+        verify(userRepository).save(existingUser);
+    }
+
+    @Test
+    public void testThatPartialUpdateDoesNotEncodeEmptyPassword() {
+        Long userId = 1L;
+        UserEntity existingUser = TestDataUtil.createTestUser();
+        existingUser.setId(userId);
+        String originalPassword = existingUser.getPassword();
+
+        UserRequestDto updateDto = UserRequestDto.builder()
+                .password("")
+                .build();
+        UserResponseDto updatedDto = UserResponseDto.builder()
+                .id(userId)
+                .username(existingUser.getUsername())
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(UserEntity.class))).thenReturn(existingUser);
+        when(userMapper.mapToResponse(any(UserEntity.class))).thenReturn(updatedDto);
+
+        underTest.partialUpdate(userId, updateDto);
+
+        verify(passwordEncoder, never()).encode(any());
+        assertThat(existingUser.getPassword()).isEqualTo(originalPassword);
+    }
+
+    @Test
+    public void testThatPartialUpdateDoesNotEncodeNullPassword() {
+        Long userId = 1L;
+        UserEntity existingUser = TestDataUtil.createTestUser();
+        existingUser.setId(userId);
+        String originalPassword = existingUser.getPassword();
+
+        UserRequestDto updateDto = UserRequestDto.builder()
+                .password(null)
+                .build();
+        UserResponseDto updatedDto = UserResponseDto.builder()
+                .id(userId)
+                .username(existingUser.getUsername())
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(UserEntity.class))).thenReturn(existingUser);
+        when(userMapper.mapToResponse(any(UserEntity.class))).thenReturn(updatedDto);
+
+        underTest.partialUpdate(userId, updateDto);
+
+        verify(passwordEncoder, never()).encode(any());
+        assertThat(existingUser.getPassword()).isEqualTo(originalPassword);
+    }
+
+    @Test
+    public void testThatIsExistsReturnsFalseWhenNotExists() {
+        when(userRepository.existsById(999L)).thenReturn(false);
+
+        boolean result = underTest.isExists(999L);
+
+        assertThat(result).isFalse();
+        verify(userRepository).existsById(999L);
+    }
 }

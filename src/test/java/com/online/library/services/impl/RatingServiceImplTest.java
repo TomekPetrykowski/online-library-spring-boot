@@ -339,4 +339,46 @@ public class RatingServiceImplTest {
 
         assertThat(result).isNull();
     }
+
+    @Test
+    public void testThatGetUserRatingForBookReturnsNullWhenUserNotFound() {
+        Long userId = 1L;
+        Long bookId = 1L;
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        Integer result = underTest.getUserRatingForBook(userId, bookId);
+
+        assertThat(result).isNull();
+        verify(userRepository).findById(userId);
+        verify(ratingRepository, never()).findByUserAndBook(any(), any());
+    }
+
+    @Test
+    public void testThatGetUserRatingForBookReturnsNullWhenBookNotFound() {
+        Long userId = 1L;
+        Long bookId = 1L;
+        UserEntity user = TestDataUtil.createTestUser();
+        user.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+        Integer result = underTest.getUserRatingForBook(userId, bookId);
+
+        assertThat(result).isNull();
+        verify(userRepository).findById(userId);
+        verify(bookRepository).findById(bookId);
+        verify(ratingRepository, never()).findByUserAndBook(any(), any());
+    }
+
+    @Test
+    public void testThatIsExistsReturnsFalseWhenNotExists() {
+        when(ratingRepository.existsById(999L)).thenReturn(false);
+
+        boolean result = underTest.isExists(999L);
+
+        assertThat(result).isFalse();
+        verify(ratingRepository).existsById(999L);
+    }
 }

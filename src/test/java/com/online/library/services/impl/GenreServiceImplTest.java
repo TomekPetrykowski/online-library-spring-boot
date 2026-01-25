@@ -140,4 +140,14 @@ public class GenreServiceImplTest {
 
         verify(genreRepository, times(1)).deleteById(genreId);
     }
+
+    @Test
+    public void testThatIsExistsReturnsFalseWhenNotExists() {
+        when(genreRepository.existsById(999L)).thenReturn(false);
+
+        boolean result = underTest.isExists(999L);
+
+        assertThat(result).isFalse();
+        verify(genreRepository).existsById(999L);
+    }
 }

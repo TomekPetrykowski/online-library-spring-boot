@@ -248,4 +248,14 @@ public class CommentServiceImplTest {
 
         assertThat(result).isEqualTo(expectedCount);
     }
+
+    @Test
+    public void testThatIsExistsReturnsFalseWhenNotExists() {
+        when(commentRepository.existsById(999L)).thenReturn(false);
+
+        boolean result = underTest.isExists(999L);
+
+        assertThat(result).isFalse();
+        verify(commentRepository).existsById(999L);
+    }
 }

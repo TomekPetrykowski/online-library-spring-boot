@@ -597,6 +597,23 @@ public class ReservationServiceImplTest {
     }
 
     @Test
+    public void testHasAvailableCopiesReturnsFalseWhenCopiesNull() {
+        // Given
+        Long bookId = 1L;
+        BookEntity book = TestDataUtil.createTestBook();
+        book.setId(bookId);
+        book.setCopiesAvailable(null);
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+
+        // When
+        boolean result = underTest.hasAvailableCopies(bookId);
+
+        // Then
+        assertThat(result).isFalse();
+    }
+
+    @Test
     public void testHasAvailableCopiesThrowsWhenBookNotFound() {
         // Given
         Long bookId = 999L;
@@ -720,5 +737,35 @@ public class ReservationServiceImplTest {
         // Then
         assertThat(result).isEmpty();
         verify(reservationRepository).findByUserIdAndBookIdAndStatusIsActive(userId, bookId);
+    }
+
+    @Test
+    public void testIsExistsReturnsFalseWhenNotExists() {
+        when(reservationRepository.existsById(999L)).thenReturn(false);
+
+        boolean result = underTest.isExists(999L);
+
+        assertThat(result).isFalse();
+        verify(reservationRepository).existsById(999L);
+    }
+
+    @Test
+    public void testCancelReservationThrowsWhenZwrocona() {
+        // Given - ZWRÓCONA status cannot be cancelled
+        Long reservationId = 1L;
+        UserEntity user = TestDataUtil.createTestUser();
+        BookEntity book = TestDataUtil.createTestBook();
+        ReservationEntity reservation = TestDataUtil.createTestReservation(user, book);
+        reservation.setId(reservationId);
+        reservation.setStatus(ReservationStatus.ZWRÓCONA);
+
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+
+        // When/Then
+        assertThatThrownBy(() -> underTest.cancelReservation(reservationId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Cannot cancel reservation");
+
+        verify(reservationRepository, never()).delete(any());
     }
 }

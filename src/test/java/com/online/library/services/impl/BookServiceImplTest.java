@@ -177,4 +177,14 @@ public class BookServiceImplTest {
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0)).isEqualTo(bookDto);
     }
+
+    @Test
+    public void testThatIsExistsReturnsFalseWhenNotExists() {
+        when(bookRepository.existsById(999L)).thenReturn(false);
+
+        boolean result = underTest.isExists(999L);
+
+        assertThat(result).isFalse();
+        verify(bookRepository).existsById(999L);
+    }
 }

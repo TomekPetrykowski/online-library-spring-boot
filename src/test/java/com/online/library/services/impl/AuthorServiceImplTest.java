@@ -152,4 +152,14 @@ public class AuthorServiceImplTest {
 
         verify(authorRepository, times(1)).deleteById(authorId);
     }
+
+    @Test
+    public void testThatIsExistsReturnsFalseWhenNotExists() {
+        when(authorRepository.existsById(999L)).thenReturn(false);
+
+        boolean result = underTest.isExists(999L);
+
+        assertThat(result).isFalse();
+        verify(authorRepository).existsById(999L);
+    }
 }
