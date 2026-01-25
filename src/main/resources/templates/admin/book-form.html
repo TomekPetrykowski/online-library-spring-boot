@@ -16,9 +16,10 @@
             </div>
             <div class="card-body">
               <form
-                th:action="${book.id != null ? '/admin/books/' + book.id : '/admin/books'}"
+                th:action="${book.id != null} ? @{/admin/books/{id}(id=${book.id})} : @{/admin/books}"
                 th:object="${book}"
-                method="post">
+                method="post"
+                enctype="multipart/form-data">
                 <div class="mb-3">
                   <label for="title" class="form-label">Tytuł *</label>
                   <input
@@ -78,13 +79,35 @@
                 </div>
 
                 <div class="mb-3">
-                  <label for="coverImagePath" class="form-label">Ścieżka okładki</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="coverImagePath"
-                    th:field="*{coverImagePath}"
-                    placeholder="/uploads/covers/nazwa-pliku.jpg" />
+                  <label for="coverImage" class="form-label">Okładka książki</label>
+
+                  <!-- Show current cover if exists (edit mode) -->
+                  <div th:if="${book.id != null && book.coverImagePath != null}" class="mb-2">
+                    <div class="d-flex align-items-center gap-3">
+                      <img
+                        th:src="@{/uploads/{path}(path=${book.coverImagePath})}"
+                        alt="Aktualna okładka"
+                        class="img-thumbnail"
+                        style="max-height: 150px; max-width: 100px" />
+                      <div>
+                        <p class="mb-1 text-muted small">Aktualna okładka</p>
+                        <div class="form-check">
+                          <input
+                            class="form-check-input"
+                            type="checkbox"
+                            name="removeCover"
+                            id="removeCover"
+                            value="true" />
+                          <label class="form-check-label text-danger" for="removeCover">
+                            <i class="bi bi-trash"></i> Usuń okładkę
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <input type="file" class="form-control" id="coverImage" name="coverImage" accept="image/*" />
+                  <small class="text-muted">Wybierz plik obrazu (JPG, PNG, GIF). Maksymalny rozmiar: 5MB</small>
                 </div>
 
                 <div class="mb-3">
