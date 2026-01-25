@@ -1,186 +1,147 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head
-        th:replace="~{fragments/layout :: header('Strona główna - System Bilioteczny OnLajn')}"
-></head>
-<body>
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+  <head th:replace="~{fragments/layout :: header('Strona główna - System Bilioteczny OnLajn')}"></head>
+  <body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
-  <div class="row">
-    <!-- Sidebar: Search and Sorting -->
-    <div class="col-md-3">
-      <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-          <h5 class="mb-0"><i class="bi bi-search"></i>Wyszukaj</h5>
-        </div>
-        <div class="card-body">
-          <form th:action="@{/}" method="get">
-            <div class="mb-3">
-              <label for="q" class="form-label">Słowo kluczowe</label>
-              <input
-                      type="text"
-                      class="form-control"
-                      id="q"
-                      name="q"
-                      th:value="${searchTerm}"
-                      placeholder="Tytuł, autor, gatunek..."
-              />
-            </div>
-            <div class="mb-3">
-              <label for="sort" class="form-label">Sortuj po:</label>
-              <select class="form-select" id="sort" name="sort">
-                <option value="title" th:selected="${sortField == 'title'}">
-                  alfabetycznie (tytuł)
-                </option>
-                <option
-                        value="publishYear"
-                        th:selected="${sortField == 'publishYear'}"
-                >
-                  rok publikacji
-                </option>
-                <option
-                        value="averageRating"
-                        th:selected="${sortField == 'averageRating'}"
-                >
-                  ocena
-                </option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="dir" class="form-label"
-              >Kierunek sortowania</label
-              >
-              <select class="form-select" id="dir" name="dir">
-                <option value="asc" th:selected="${sortDir == 'asc'}">
-                  rosnący
-                </option>
-                <option value="desc" th:selected="${sortDir == 'desc'}">
-                  malejący
-                </option>
-              </select>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">
-              Wyszukaj
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header bg-warning text-dark">
-          <h5 class="mb-0">
-            <i class="bi bi-star-fill"></i>Popularne książki
-          </h5>
-        </div>
-        <div class="list-group list-group-flush">
-          <a
-                  th:each="pBook : ${popularBooks}"
-                  th:href="@{/books/{id}(id=${pBook.id})}"
-                  class="list-group-item list-group-item-action"
-          >
-            <h6 class="mb-1" th:text="${pBook.title}">Tytuł</h6>
-            <small class="text-muted">
-              Ocena:
-              <span class="rating-stars"
-              ><i class="bi bi-star-fill"></i
-              ></span>
-              <span th:text="${pBook.averageRating ?: '0.0'}">4.5</span>
-            </small>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content: Book List -->
-    <div class="col-md-9">
-      <div th:if="${!#strings.isEmpty(searchTerm)}" class="mb-3">
-        <h4>
-          Wyniki wyszukiwania dla: "<span th:text="${searchTerm}"></span>"
-        </h4>
-      </div>
-
-      <div class="row row-cols-1 row-cols-md-3 g-4">
-        <div th:each="book : ${books.content}" class="col">
-          <div class="card book-card">
-            <img
-                    th:if="${book.coverImagePath}"
-                    th:src="${book.coverImagePath}"
-                    class="card-img-top"
-                    alt="Book cover"
-                    style="height: 200px; object-fit: cover"
-            />
-            <div
-                    th:unless="${book.coverImagePath}"
-                    class="bg-secondary text-white d-flex align-items-center justify-content-center"
-                    style="height: 200px"
-            >
-              <i class="bi bi-book" style="font-size: 4rem"></i>
+    <div class="container">
+      <div class="row">
+        <!-- Sidebar: Search and Sorting -->
+        <div class="col-md-3">
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0"><i class="bi bi-search"></i>Wyszukaj</h5>
             </div>
             <div class="card-body">
-              <h5 class="card-title text-truncate" th:text="${book.title}">Tytył</h5>
-              <div class="d-flex justify-content-between align-items-center">
-                <p class="card-text mb-1">
-                  <small class="text-muted" th:each="author, iterStat : ${book.authors}">
-                    <span th:text="${author.name + ' ' + author.lastName}">Autor</span>
-                    <span th:if="${!iterStat.last}">, </span>
-                  </small>
-                </p>
-                <small class="text-muted">
-                  <span class="rating-stars" th:if="${book.averageRating != 0.0}">
-                    <i class="bi bi-star-fill"></i>
-                    <span class="text-dark" th:text="${book.averageRating}?: 'brak ocen'">4.5</span>
-                  </span>
-                </small>
-              </div>
-              <p class="card-text">
-                <span class="badge bg-info text-dark me-1" th:each="genre : ${book.genres}" th:text="${genre.name}">Gatunek</span>
-              </p>
+              <form th:action="@{/}" method="get">
+                <div class="mb-3">
+                  <label for="q" class="form-label">Słowo kluczowe</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="q"
+                    name="q"
+                    th:value="${searchTerm}"
+                    placeholder="Tytuł, autor, gatunek..." />
+                </div>
+                <div class="mb-3">
+                  <label for="sort" class="form-label">Sortuj po:</label>
+                  <select class="form-select" id="sort" name="sort">
+                    <option value="title" th:selected="${sortField == 'title'}"> alfabetycznie (tytuł) </option>
+                    <option value="publishYear" th:selected="${sortField == 'publishYear'}"> rok publikacji </option>
+                    <option value="averageRating" th:selected="${sortField == 'averageRating'}"> ocena </option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="dir" class="form-label">Kierunek sortowania</label>
+                  <select class="form-select" id="dir" name="dir">
+                    <option value="asc" th:selected="${sortDir == 'asc'}"> rosnący </option>
+                    <option value="desc" th:selected="${sortDir == 'desc'}"> malejący </option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100"> Wyszukaj </button>
+              </form>
             </div>
-            <div class="card-footer bg-transparent border-top-0">
-              <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-outline-primary btn-sm w-100">Szczegóły</a>
+          </div>
+
+          <div class="card">
+            <div class="card-header bg-warning text-dark">
+              <h5 class="mb-0"> <i class="bi bi-star-fill"></i>Popularne książki </h5>
+            </div>
+            <div class="list-group list-group-flush">
+              <a
+                th:each="pBook : ${popularBooks}"
+                th:href="@{/books/{id}(id=${pBook.id})}"
+                class="list-group-item list-group-item-action">
+                <h6 class="mb-1" th:text="${pBook.title}">Tytuł</h6>
+                <small class="text-muted">
+                  Ocena:
+                  <span class="rating-stars"><i class="bi bi-star-fill"></i></span>
+                  <span th:text="${pBook.averageRating ?: '0.0'}">4.5</span>
+                </small>
+              </a>
             </div>
           </div>
         </div>
-      </div>
 
-      <div th:if="${books.isEmpty()}" class="alert alert-info mt-4">
-        No books found.
-      </div>
+        <!-- Main Content: Book List -->
+        <div class="col-md-9">
+          <div th:if="${!#strings.isEmpty(searchTerm)}" class="mb-3">
+            <h4> Wyniki wyszukiwania dla: "<span th:text="${searchTerm}"></span>" </h4>
+          </div>
 
-      <!-- Pagination (Basic) -->
-      <nav th:if="${books.totalPages > 1}" class="mt-4">
-        <ul class="pagination justify-content-center">
-          <li
-                  class="page-item"
-                  th:classappend="${books.first} ? 'disabled'"
-          >
-            <a
-                    class="page-link"
-                    th:href="@{/(page=${books.number - 1}, q=${searchTerm}, sort=${sortField}, dir=${sortDir})}"
-            >Poprzednia</a
-            >
-          </li>
-          <li class="page-item disabled">
-                <span
-                        class="page-link"
-                        th:text="${books.number + 1 + ' / ' + books.totalPages}"
-                >1 / 5</span
+          <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div th:each="book : ${books.content}" class="col">
+              <div class="card book-card">
+                <img
+                  th:if="${book.coverImagePath != null && !book.coverImagePath.isEmpty()}"
+                  th:src="@{/uploads/{path}(path=${book.coverImagePath})}"
+                  class="card-img-top"
+                  alt="Book cover"
+                  style="height: 200px; object-fit: cover" />
+                <div
+                  th:if="${book.coverImagePath == null || book.coverImagePath.isEmpty()}"
+                  class="bg-secondary text-white d-flex align-items-center justify-content-center"
+                  style="height: 200px">
+                  <i class="bi bi-book" style="font-size: 4rem"></i>
+                </div>
+                <div class="card-body">
+                  <h5 class="card-title text-truncate" th:text="${book.title}">Tytył</h5>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <p class="card-text mb-1">
+                      <small class="text-muted" th:each="author, iterStat : ${book.authors}">
+                        <span th:text="${author.name + ' ' + author.lastName}">Autor</span>
+                        <span th:if="${!iterStat.last}">, </span>
+                      </small>
+                    </p>
+                    <small class="text-muted">
+                      <span class="rating-stars" th:if="${book.averageRating != 0.0}">
+                        <i class="bi bi-star-fill"></i>
+                        <span class="text-dark" th:text="${book.averageRating}?: 'brak ocen'">4.5</span>
+                      </span>
+                    </small>
+                  </div>
+                  <p class="card-text">
+                    <span class="badge bg-info text-dark me-1" th:each="genre : ${book.genres}" th:text="${genre.name}"
+                      >Gatunek</span
+                    >
+                  </p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0">
+                  <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-outline-primary btn-sm w-100">Szczegóły</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div th:if="${books.isEmpty()}" class="alert alert-info mt-4"> No books found. </div>
+
+          <!-- Pagination (Basic) -->
+          <nav th:if="${books.totalPages > 1}" class="mt-4">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" th:classappend="${books.first} ? 'disabled'">
+                <a
+                  class="page-link"
+                  th:href="@{/(page=${books.number - 1}, q=${searchTerm}, sort=${sortField}, dir=${sortDir})}"
+                  >Poprzednia</a
                 >
-          </li>
-          <li class="page-item" th:classappend="${books.last} ? 'disabled'">
-            <a
-                    class="page-link"
-                    th:href="@{/(page=${books.number + 1}, q=${searchTerm}, sort=${sortField}, dir=${sortDir})}"
-            >Następna</a
-            >
-          </li>
-        </ul>
-      </nav>
+              </li>
+              <li class="page-item disabled">
+                <span class="page-link" th:text="${books.number + 1 + ' / ' + books.totalPages}">1 / 5</span>
+              </li>
+              <li class="page-item" th:classappend="${books.last} ? 'disabled'">
+                <a
+                  class="page-link"
+                  th:href="@{/(page=${books.number + 1}, q=${searchTerm}, sort=${sortField}, dir=${sortDir})}"
+                  >Następna</a
+                >
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<footer th:replace="~{fragments/layout :: footer}"></footer>
-</body>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+  </body>
 </html>

@@ -28,13 +28,13 @@
         <div class="col-md-4">
           <div class="card">
             <img
-              th:if="${book.coverImagePath}"
-              th:src="${book.coverImagePath}"
+              th:if="${book.coverImagePath != null && !book.coverImagePath.isEmpty()}"
+              th:src="@{/uploads/{path}(path=${book.coverImagePath})}"
               class="card-img-top"
               alt="Book cover"
               style="max-height: 400px; object-fit: cover" />
             <div
-              th:unless="${book.coverImagePath}"
+              th:if="${book.coverImagePath == null || book.coverImagePath.isEmpty()}"
               class="bg-secondary text-white d-flex align-items-center justify-content-center"
               style="height: 400px">
               <i class="bi bi-book" style="font-size: 6rem"></i>
