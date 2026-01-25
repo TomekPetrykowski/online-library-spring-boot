@@ -85,10 +85,9 @@ class SecurityConfigTest {
     @Test
     void testApiPostRequiresAuthentication() throws Exception {
         mockMvc.perform(post("/api/v1/books")
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"title\":\"Test\",\"isbn\":\"123\"}"))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -157,12 +156,14 @@ class SecurityConfigTest {
     }
 
     @Test
-    void testPostWithoutCsrfIsForbidden() throws Exception {
+    void testApiCsrfIsDisabled() throws Exception {
+        // CSRF is disabled for API endpoints (stateless), so requests without CSRF
+        // token succeed
         mockMvc.perform(post("/api/v1/authors")
                 .with(user("admin").roles("ADMIN"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Test\",\"lastName\":\"Author\"}"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isCreated());
     }
 
     @Test
