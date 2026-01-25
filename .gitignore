@@ -61,3 +61,5 @@ replay_pid*
 library.iml
 
 .env
+
+uploads/
