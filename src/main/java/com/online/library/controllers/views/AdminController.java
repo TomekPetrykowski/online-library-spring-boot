@@ -4,13 +4,18 @@ import com.online.library.domain.dto.*;
 import com.online.library.domain.enums.ReservationStatus;
 import com.online.library.services.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
@@ -18,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -30,6 +36,9 @@ public class AdminController {
     private final GenreService genreService;
     private final ReservationService reservationService;
     private final AnalyticsService analyticsService;
+    private final ExportService exportService;
+    private final UserService userService;
+    private final FileStorageService fileStorageService;
 
     @GetMapping
     public String adminDashboard(Model model) {
@@ -89,12 +98,29 @@ public class AdminController {
             BindingResult result,
             @RequestParam(value = "authorIds", required = false) List<Long> authorIds,
             @RequestParam(value = "genreIds", required = false) List<Long> genreIds,
+            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
             Model model,
             RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("allAuthors", authorService.findAll(ALL_ITEMS).getContent());
             model.addAttribute("allGenres", genreService.findAll(ALL_ITEMS).getContent());
             return "admin/book-form";
+        }
+
+        // Handle cover image upload
+        if (coverImage != null && !coverImage.isEmpty()) {
+            String contentType = coverImage.getContentType();
+            if (contentType != null && contentType.startsWith("image/")) {
+                try {
+                    String filePath = fileStorageService.storeFile(coverImage, "covers");
+                    bookDto.setCoverImagePath(filePath);
+                    log.info("Cover uploaded for new book: {}", filePath);
+                } catch (Exception e) {
+                    log.error("Failed to upload cover for new book", e);
+                    redirectAttributes.addFlashAttribute("error",
+                            "Błąd podczas przesyłania okładki: " + e.getMessage());
+                }
+            }
         }
 
         // Set authors
@@ -136,6 +162,8 @@ public class AdminController {
             BindingResult result,
             @RequestParam(value = "authorIds", required = false) List<Long> authorIds,
             @RequestParam(value = "genreIds", required = false) List<Long> genreIds,
+            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
+            @RequestParam(value = "removeCover", required = false) boolean removeCover,
             Model model,
             RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
@@ -144,6 +172,33 @@ public class AdminController {
             return "admin/book-form";
         }
         bookDto.setId(id);
+
+        // Handle cover image
+        if (removeCover) {
+            // Remove existing cover
+            bookDto.setCoverImagePath(null);
+            log.info("Cover removed for book id={}", id);
+        } else if (coverImage != null && !coverImage.isEmpty()) {
+            String contentType = coverImage.getContentType();
+            if (contentType != null && contentType.startsWith("image/")) {
+                try {
+                    String filePath = fileStorageService.storeFile(coverImage, "covers");
+                    bookDto.setCoverImagePath(filePath);
+                    log.info("Cover uploaded for book id={}: {}", id, filePath);
+                } catch (Exception e) {
+                    log.error("Failed to upload cover for book id={}", id, e);
+                    redirectAttributes.addFlashAttribute("error",
+                            "Błąd podczas przesyłania okładki: " + e.getMessage());
+                }
+            }
+        } else {
+            // Keep existing cover - fetch it from the database
+            bookService.findById(id).ifPresent(existingBook -> {
+                if (existingBook.getCoverImagePath() != null) {
+                    bookDto.setCoverImagePath(existingBook.getCoverImagePath());
+                }
+            });
+        }
 
         // Set authors
         if (authorIds != null && !authorIds.isEmpty()) {
@@ -241,5 +296,112 @@ public class AdminController {
         genreService.delete(id);
         redirectAttributes.addFlashAttribute("success", "Gatunek usunięty.");
         return "redirect:/admin/genres";
+    }
+
+    @GetMapping("/reports/export/popular-books")
+    public ResponseEntity<byte[]> exportPopularBooksCsv() {
+        List<BookStatDto> books = analyticsService.getMostPopularBooks(100);
+        byte[] csvData = exportService.exportPopularBooksToCsv(books);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=popularne_ksiazki.csv")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(csvData);
+    }
+
+    @GetMapping("/reports/export/read-authors")
+    public ResponseEntity<byte[]> exportReadAuthorsCsv() {
+        List<AuthorStatDto> authors = analyticsService.getMostReadAuthors(100);
+        byte[] csvData = exportService.exportReadAuthorsToCsv(authors);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=czytani_autorzy.csv")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(csvData);
+    }
+
+    @GetMapping("/reports/export/active-users")
+    public ResponseEntity<byte[]> exportActiveUsersCsv() {
+        List<UserStatDto> users = analyticsService.getMostActiveUsers(100);
+        byte[] csvData = exportService.exportActiveUsersToCsv(users);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=aktywni_uzytkownicy.csv")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(csvData);
+    }
+
+    @GetMapping("/users")
+    public String listUsers(@RequestParam(defaultValue = "0") int page, Model model) {
+        Pageable pageable = PageRequest.of(page, 20);
+        model.addAttribute("users", userService.findAll(pageable));
+        return "admin/users";
+    }
+
+    @GetMapping("/users/new")
+    public String newUserForm(Model model) {
+        model.addAttribute("user", new UserRequestDto());
+        return "admin/user-form";
+    }
+
+    @PostMapping("/users")
+    public String createUser(@Valid @ModelAttribute("user") UserRequestDto userDto,
+            BindingResult result,
+            RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "admin/user-form";
+        }
+        try {
+            userService.save(userDto);
+            redirectAttributes.addFlashAttribute("success", "Użytkownik utworzony.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Błąd podczas tworzenia użytkownika: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    @GetMapping("/users/{id}/edit")
+    public String editUserForm(@PathVariable Long id, Model model) {
+        UserResponseDto user = userService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Użytkownik nie znaleziony"));
+        // Convert to request DTO for the form
+        UserRequestDto formDto = UserRequestDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .enabled(user.getEnabled())
+                .build();
+        model.addAttribute("user", formDto);
+        return "admin/user-form";
+    }
+
+    @PostMapping("/users/{id}")
+    public String updateUser(@PathVariable Long id,
+            @Valid @ModelAttribute("user") UserRequestDto userDto,
+            BindingResult result,
+            RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "admin/user-form";
+        }
+        userDto.setId(id);
+        try {
+            userService.partialUpdate(id, userDto);
+            redirectAttributes.addFlashAttribute("success", "Użytkownik zaktualizowany.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Błąd podczas aktualizacji: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/users/{id}/delete")
+    public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            userService.delete(id);
+            redirectAttributes.addFlashAttribute("success", "Użytkownik usunięty.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Błąd podczas usuwania: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
     }
 }
