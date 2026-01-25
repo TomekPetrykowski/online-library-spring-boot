@@ -125,13 +125,33 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
-
     <!-- Source: https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
     <dependency>
       <groupId>org.jacoco</groupId>
       <artifactId>jacoco-maven-plugin</artifactId>
       <version>0.8.14</version>
       <scope>compile</scope>
+    </dependency>
+    <!-- ArchUnit -->
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit-junit5</artifactId>
+      <version>1.2.1</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Selenium -->
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>4.16.1</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- WebDriverManager (automatyczne zarządzanie driverami) -->
+    <dependency>
+      <groupId>io.github.bonigarcia</groupId>
+      <artifactId>webdrivermanager</artifactId>
+      <version>5.6.3</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
