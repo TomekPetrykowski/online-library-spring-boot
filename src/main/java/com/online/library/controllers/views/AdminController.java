@@ -3,6 +3,7 @@ package com.online.library.controllers.views;
 import com.online.library.domain.dto.*;
 import com.online.library.domain.enums.ReservationStatus;
 import com.online.library.services.*;
+import com.online.library.validation.ValidationGroups;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -345,7 +347,7 @@ public class AdminController {
     }
 
     @PostMapping("/users")
-    public String createUser(@Valid @ModelAttribute("user") UserRequestDto userDto,
+    public String createUser(@Validated(ValidationGroups.Create.class) @ModelAttribute("user") UserRequestDto userDto,
             BindingResult result,
             RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
@@ -378,7 +380,7 @@ public class AdminController {
 
     @PostMapping("/users/{id}")
     public String updateUser(@PathVariable Long id,
-            @Valid @ModelAttribute("user") UserRequestDto userDto,
+            @Validated(ValidationGroups.Update.class) @ModelAttribute("user") UserRequestDto userDto,
             BindingResult result,
             RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {

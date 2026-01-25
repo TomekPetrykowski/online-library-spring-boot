@@ -82,6 +82,9 @@ public class UserServiceImpl implements UserService {
             Optional.ofNullable(userDto.getUsername()).ifPresent(existingUser::setUsername);
             Optional.ofNullable(userDto.getEmail()).ifPresent(existingUser::setEmail);
             if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+                if (userDto.getPassword().length() < 12 || userDto.getPassword().length() > 256) {
+                    throw new IllegalArgumentException("Password must be between 12 and 256 characters");
+                }
                 existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
             }
             Optional.ofNullable(userDto.getRole()).ifPresent(existingUser::setRole);
