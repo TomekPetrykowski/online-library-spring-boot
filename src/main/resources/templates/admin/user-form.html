@@ -1,0 +1,96 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments/layout :: header('Formularz użytkownika')}"></head>
+  <body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h4 th:if="${user.id == null}"><i class="bi bi-person-plus"></i> Dodaj użytkownika</h4>
+              <h4 th:if="${user.id != null}"><i class="bi bi-person-gear"></i> Edytuj użytkownika</h4>
+            </div>
+            <div class="card-body">
+              <form
+                th:action="${user.id != null} ? @{/admin/users/{id}(id=${user.id})} : @{/admin/users}"
+                th:object="${user}"
+                method="post">
+                <div class="mb-3">
+                  <label for="username" class="form-label">Nazwa użytkownika *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
+                    id="username"
+                    th:field="*{username}"
+                    required />
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email *</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                    id="email"
+                    th:field="*{email}"
+                    required />
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+
+                <div class="mb-3" th:if="${user.id == null}">
+                  <label for="password" class="form-label">Hasło *</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                    id="password"
+                    th:field="*{password}"
+                    th:required="${user.id == null}"
+                    minlength="12" />
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                  <small class="form-text text-muted">Minimum 12 znaków</small>
+                </div>
+
+                <div class="mb-3" th:if="${user.id != null}">
+                  <label for="password" class="form-label">Nowe hasło (zostaw puste, aby nie zmieniać)</label>
+                  <input type="password" class="form-control" id="password" th:field="*{password}" minlength="12" />
+                  <small class="form-text text-muted">Minimum 12 znaków</small>
+                </div>
+
+                <div class="mb-3">
+                  <label for="role" class="form-label">Rola *</label>
+                  <select
+                    class="form-select"
+                    th:classappend="${#fields.hasErrors('role')} ? 'is-invalid' : ''"
+                    id="role"
+                    th:field="*{role}"
+                    required>
+                    <option value="">-- Wybierz rolę --</option>
+                    <option value="USER">Użytkownik (USER)</option>
+                    <option value="ADMIN">Administrator (ADMIN)</option>
+                  </select>
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                  <a th:href="@{/admin/users}" class="btn btn-secondary"> <i class="bi bi-arrow-left"></i> Anuluj </a>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i>
+                    <span th:if="${user.id == null}">Utwórz użytkownika</span>
+                    <span th:if="${user.id != null}">Zapisz zmiany</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+  </body>
+</html>
