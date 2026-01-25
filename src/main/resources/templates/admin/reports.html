@@ -14,8 +14,11 @@
         <!-- Most Popular Books -->
         <div class="col-lg-4 mb-4">
           <div class="card h-100">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
               <h5 class="mb-0"><i class="bi bi-star-fill"></i> Najpopularniejsze książki</h5>
+              <a th:href="@{/admin/reports/export/popular-books}" class="btn btn-sm btn-light" title="Eksportuj do CSV">
+                <i class="bi bi-download"></i> CSV
+              </a>
             </div>
             <div class="card-body p-0">
               <table class="table table-striped table-hover mb-0">
@@ -54,8 +57,11 @@
         <!-- Most Read Authors -->
         <div class="col-lg-4 mb-4">
           <div class="card h-100">
-            <div class="card-header bg-success text-white">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
               <h5 class="mb-0"><i class="bi bi-person-fill"></i> Najczęściej czytani autorzy</h5>
+              <a th:href="@{/admin/reports/export/read-authors}" class="btn btn-sm btn-light" title="Eksportuj do CSV">
+                <i class="bi bi-download"></i> CSV
+              </a>
             </div>
             <div class="card-body p-0">
               <table class="table table-striped table-hover mb-0">
@@ -84,8 +90,11 @@
         <!-- Most Active Users -->
         <div class="col-lg-4 mb-4">
           <div class="card h-100">
-            <div class="card-header bg-info text-white">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
               <h5 class="mb-0"><i class="bi bi-people-fill"></i> Najbardziej aktywni użytkownicy</h5>
+              <a th:href="@{/admin/reports/export/active-users}" class="btn btn-sm btn-light" title="Eksportuj do CSV">
+                <i class="bi bi-download"></i> CSV
+              </a>
             </div>
             <div class="card-body p-0">
               <table class="table table-striped table-hover mb-0">
